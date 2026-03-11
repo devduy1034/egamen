@@ -1,3 +1,0 @@
-<div class="breadCrumbs">
- <div class="container"><?php echo BreadCrumbs::get(); ?></div>
-</div>
