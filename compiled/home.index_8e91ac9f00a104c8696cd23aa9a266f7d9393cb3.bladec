@@ -1,0 +1,579 @@
+<?php $_shouldextend[1]=1; ?>
+<?php $this->startSection('content'); ?>
+ <?php if($criteria->isNotEmpty()): ?>
+ <section class="wrap-criteria">
+ <div class="wrap-content">
+ <div class="policies-body">
+ <?php $__currentLoopData = $criteria; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $k => $v): $loop = $this->incrementLoopIndices();  ?>
+ <div class="policies-item">
+ <div class="policies-image">
+ <?php  $this->startComponent('component.image', [
+ 'rel' => 'preload',
+ 'class' => 'w-100',
+ 'w' => config('type.photo.' . $v['type'] . '.images.photo.width'),
+ 'h' => config('type.photo.' . $v['type'] . '.images.photo.height'),
+ 'z' => 0,
+ 'type' => '',
+ 'destination' => 'photo',
+ 'image' => $v['photo'] ?? '',
+ 'alt' => $v['name' . $lang] ?? '',
+ ]); ?>
+ <?php echo $this->renderComponent(); ?>
+ </div>
+ <div class="policies-info">
+ <h3 class="policies-title"><?php echo \html_entity_decode($v['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?></h3>
+ <div class="policies-desc"><?php echo \html_entity_decode($v['desc' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?></div>
+ </div>
+ </div>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </div>
+ </div>
+ </section>
+ <?php endif; ?>
+
+ <?php if(!empty($vouchers) && $vouchers->isNotEmpty()): ?>
+ <section class="wrap-voucher-home">
+ <div class="wrap-content">
+ <div class="row g-3">
+ <?php $__currentLoopData = $vouchers; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $voucher): $loop = $this->incrementLoopIndices();  ?>
+ <?php 
+ $discountType = strtoupper((string) ($voucher['discount_type'] ?? ''));
+ $discountValue = (float) ($voucher['discount_value'] ?? 0);
+ $maxDiscount = (float) ($voucher['max_discount'] ?? 0);
+ $minOrderValue = (float) ($voucher['min_order_value'] ?? 0);
+ $conditionText = trim((string) ($voucher['condition_text'] ?? ''));
+ $conditionLines = array_values(array_filter(array_map('trim', preg_split('/\r\n|\n|\r/', $conditionText))));
+
+ if ($discountType === 'PERCENT') {
+ $discountText = 'Giảm ' . rtrim(rtrim(number_format($discountValue, 2, '.', ''), '0'), '.') . '%';
+ if ($maxDiscount > 0) {
+ $discountText .= ' tối đa ' . number_format($maxDiscount, 0, ',', '.') . 'đ';
+ }
+ } elseif ($discountType === 'FIXED_AMOUNT') {
+ $discountText = 'Giảm ' . number_format($discountValue, 0, ',', '.') . 'đ';
+ } else {
+ $discountText = 'Miễn phí vận chuyển';
+ if ($discountValue > 0) {
+ $discountText .= ' tối đa ' . number_format($discountValue, 0, ',', '.') . 'đ';
+ }
+ }
+
+ $summaryText = trim((string) ($voucher['description'] ?? ''));
+ if ($summaryText === '') {
+ $summaryText = $discountText;
+ if ($minOrderValue > 0) {
+ $summaryText .= ' cho đơn hàng tối thiểu ' . number_format($minOrderValue, 0, ',', '.') . 'đ';
+ }
+ }
+
+ $scopeType = strtoupper((string) ($voucher['scope_type'] ?? 'ALL'));
+ if ($scopeType === 'CATEGORY') {
+ $scopeText = 'Áp dụng cho danh mục được chọn';
+ } elseif ($scopeType === 'PRODUCT') {
+ $scopeText = 'Áp dụng cho sản phẩm được chọn';
+ } else {
+ $scopeText = 'Áp dụng cho tất cả sản phẩm';
+ }
+
+ $minOrderText = $minOrderValue > 0
+ ? 'Đơn tối thiểu ' . number_format($minOrderValue, 0, ',', '.') . 'đ'
+ : 'Không yêu cầu đơn tối thiểu';
+
+ $expiryTimestamp = !empty($voucher['end_at']) ? strtotime((string) $voucher['end_at']) : false;
+ $expiryText = !empty($expiryTimestamp) ? date('d/m/Y H:i', $expiryTimestamp) : '';
+
+ $voucherImage = !empty($voucher['photo'])
+ ? assets_photo('voucher', '70x115x1', $voucher['photo'], 'thumbs')
+ : assets('assets/images/noimage.png');
+ ?>
+ <div class="col-12 col-sm-6 col-xl-3">
+ <article class="voucher-home-card h-100">
+ <div class="voucher-home-thumb">
+ <img src="<?php echo \html_entity_decode($voucherImage??'', ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo \html_entity_decode($voucher['code'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?>">
+ </div>
+ <div class="voucher-home-info">
+ <h3 class="voucher-home-code">NHẬP MÃ: <?php echo \html_entity_decode($voucher['code'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?></h3>
+ <p class="voucher-home-desc"><?php echo \html_entity_decode($summaryText??'', ENT_QUOTES, 'UTF-8'); ?></p>
+ <div class="voucher-home-action">
+ <button type="button" class="voucher-home-btn js-copy-voucher-home"
+ data-code="<?php echo \html_entity_decode($voucher['code'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?>">
+ Sao chép
+ </button>
+ <button type="button" class="voucher-home-link" data-bs-toggle="modal"
+ data-bs-target="#voucher-home-modal-<?php echo \html_entity_decode($voucher['id']??'', ENT_QUOTES, 'UTF-8'); ?>">
+ Điều kiện
+ </button>
+ </div>
+ </div>
+ </article>
+ </div>
+
+ <div class="modal fade voucher-home-modal" id="voucher-home-modal-<?php echo \html_entity_decode($voucher['id']??'', ENT_QUOTES, 'UTF-8'); ?>"
+ tabindex="-1" aria-hidden="true">
+ <div class="modal-dialog modal-dialog-centered">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h5 class="modal-title">NHẬP MÃ: <?php echo \html_entity_decode($voucher['code'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?></h5>
+ <button type="button" class="btn-close" data-bs-dismiss="modal"
+ aria-label="Close"></button>
+ </div>
+ <div class="modal-body">
+ <div class="voucher-home-modal-code">
+ <span>Mã khuyến mãi:</span>
+ <strong><?php echo \html_entity_decode($voucher['code'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?></strong>
+ </div>
+ <div class="voucher-home-modal-condition">
+ <p>Điều kiện:</p>
+ <ul>
+ <?php if(!empty($conditionLines)): ?>
+ <?php $__currentLoopData = $conditionLines; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $conditionLine): $loop = $this->incrementLoopIndices();  ?>
+ <li><?php echo \html_entity_decode($conditionLine??'', ENT_QUOTES, 'UTF-8'); ?></li>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ <?php else: ?>
+ <li>Vui lòng nhập điều kiện chi tiết trong admin.</li>
+ <?php endif; ?>
+ </ul>
+ </div>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
+ <button type="button" class="btn btn-primary js-copy-voucher-home"
+ data-code="<?php echo \html_entity_decode($voucher['code'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?>">
+ Sao chép
+ </button>
+ </div>
+ </div>
+ </div>
+ </div>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </div>
+ </div>
+ </section>
+
+ <?php endif; ?>
+
+ <?php if($productcat->isNotEmpty()): ?>
+ <section class="wrap-procat-home">
+ <div class="wrap-content">
+ <div class="title-main-home">
+ <h2>Thời trang EGA</h2>
+ </div>
+ <div class="swiper swiper-auto"
+ data-swiper="slidesPerView:1|spaceBetween:10|breakpoints:{370: {slidesPerView:2,spaceBetween:10},575: {slidesPerView:2,spaceBetween:20},768: {slidesPerView:3,spaceBetween:20},992: {slidesPerView:6,spaceBetween:10}}|autoplay:{delay: 5000,pauseOnMouseEnter:true,disableOnInteraction:false}|speed:1000|navigation:{nextEl:'.procat-next',prevEl:'.procat-prev'}|loop:true">
+ <div
+ class="swiper-wrapper row row-product row-cols-2 row-cols-sm-3 row-cols-md-5 row-cols-lg-6 flex-nowrap gutter-x-20">
+ <?php $__currentLoopData = $productcat; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $v): $loop = $this->incrementLoopIndices();  ?>
+ <div class="swiper-slide">
+ <div class="item-procat">
+ <div class="pic-procat">
+ <a class="" href="<?php echo \html_entity_decode($v[$sluglang]??'', ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo \html_entity_decode($v['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?>">
+ <?php  $this->startComponent('component.image', [
+ 'rel' => 'preload',
+ 'class' => 'w-100',
+ 'w' => config('type.product.' . $v['type'] . '.categories.cat.images.photo.width'),
+ 'h' => config('type.product.' . $v['type'] . '.categories.cat.images.photo.height'),
+ 'z' => config('type.product.' . $v['type'] . '.categories.cat.images.photo.opt'),
+ 'is_watermarks' => false,
+ 'destination' => 'product',
+ 'image' => $v['photo'] ?? '',
+ 'alt' => $v['name' . $lang] ?? '',
+ ]); ?>
+ <?php echo $this->renderComponent(); ?>
+ </a>
+ </div>
+ <div class="info-procat">
+ <h3 class="">
+ <a class="text-split text-decoration-none name-procat"
+ href="<?php echo \html_entity_decode($v[$sluglang]??'', ENT_QUOTES, 'UTF-8'); ?>"
+ title="<?php echo \html_entity_decode($v['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?>"><?php echo \html_entity_decode($v['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?></a>
+ </h3>
+ <div class="count-procat">
+ <?php echo \html_entity_decode($v->getItems->count()??'', ENT_QUOTES, 'UTF-8'); ?> sản phẩm
+ </div>
+ </div>
+ </div>
+ </div>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </div>
+ <div class="swiper-button-prev procat-prev"></div>
+ <div class="swiper-button-next procat-next"></div>
+ </div>
+ </div>
+ </section>
+ <?php endif; ?>
+ <?php if($productNew->isNotEmpty()): ?>
+ <section class="wrap-product-new">
+ <div id="" class="load-home other-product" data-url="<?php echo \html_entity_decode(url('load-product')??'', ENT_QUOTES, 'UTF-8'); ?>" data-section="home"
+ data-type="san-pham" data-status="moi" data-paginate="5" data-other="1" data-slug="san-pham"
+ data-eshow=".paging-product-home" data-template="List">
+ <div class="wrap-content">
+ <div class="title-main-home">
+ <h2>Sản phẩm mới</h2>
+ </div>
+ <div class="paging-product-home"></div>
+ </div>
+ </div>
+ </section>
+ <?php endif; ?>
+ <?php if($banner_quangcao->isNotEmpty()): ?>
+ <section class="wrap-banner-adv">
+ <div class="wrap-content">
+ <div class="banner-adv">
+ <div class="swiper swiper-auto"
+ data-swiper="autoplay:{delay: 5000,pauseOnMouseEnter:true,disableOnInteraction:false}|speed:1000|loop:true|navigation:{nextEl:'.-next',prevEl:'.-prev'}|effect:'fade'|fadeEffect: {crossFade: true}">
+ <div class="swiper-wrapper">
+ <?php $__currentLoopData = $banner_quangcao; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $k => $v): $loop = $this->incrementLoopIndices();  ?>
+ <div class="swiper-slide">
+ <a class="d-block" href="<?php echo \html_entity_decode($v['link'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo \html_entity_decode($v['namevi']??'', ENT_QUOTES, 'UTF-8'); ?>">
+ <?php  $this->startComponent('component.image', [
+ 'class' => 'w-100',
+ 'w' => config('type.photo.' . $v['type'] . '.width'),
+ 'h' => config('type.photo.' . $v['type'] . '.height'),
+ 'z' => config('type.photo.' . $v['type'] . '.opt'),
+ 'is_watermarks' => false,
+ 'destination' => 'photo',
+ 'image' => $v['photo'] ?? '',
+ 'alt' => $v['namevi'] ?? '',
+ ]); ?>
+ <?php echo $this->renderComponent(); ?>
+ </a>
+ </div>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </div>
+ </div>
+ </div>
+ </div>
+ </section>
+ <?php endif; ?>
+ <?php if($productList->isNotEmpty()): ?>
+ <section class="wrap-product-list-home">
+ <?php $__currentLoopData = $productList; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $vlist): $loop = $this->incrementLoopIndices();  ?>
+ <div class="list-product other-product">
+ <div class="wrap-content">
+ <div class="box-title flex justify-between items-center">
+ <div class="title-pro"><h2><?php echo \html_entity_decode($vlist['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?></h2></div>
+ <div class="list-c2">
+ <?php if(!empty($vlist->getCategoryCats)): ?>
+ <div class="title-cat-main click-product">
+ <?php $__currentLoopData = $vlist->getCategoryCats ?? []; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $k => $cat): $loop = $this->incrementLoopIndices();  ?>
+ <span class="" data-url="<?php echo \html_entity_decode(url('load-product')??'', ENT_QUOTES, 'UTF-8'); ?>"
+ data-cat="<?php echo \html_entity_decode($cat['id']??'', ENT_QUOTES, 'UTF-8'); ?>" data-list="<?php echo \html_entity_decode($vlist['id']??'', ENT_QUOTES, 'UTF-8'); ?>"
+ data-paginate="4" data-eshow=".list-<?php echo \html_entity_decode($vlist['id']??'', ENT_QUOTES, 'UTF-8'); ?>"
+ data-slug="<?php echo \html_entity_decode($cat['slug' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?>" data-type="san-pham"
+ data-section="cat" data-template="Cat">
+ <?php echo \html_entity_decode($cat['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </span>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </div>
+ <?php endif; ?>
+ </div>
+ </div>
+ <div class="paging-product list-<?php echo \html_entity_decode($vlist['id']??'', ENT_QUOTES, 'UTF-8'); ?>"></div>
+ 
+
+ </div>
+ </div>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </section>
+ <?php endif; ?>
+ <?php if(!empty($video)): ?>
+ <section class="wrap-video-home my-4">
+ <div class="wrap-content">
+ <div class="video-home" data-aos="zoom-in" data-aos-duration="1000">
+ <div class="video-wrapper">
+ <iframe width="100%" height="100%" src="<?php echo \html_entity_decode(Func::get_youtube($video['link'] ?? '')??'', ENT_QUOTES, 'UTF-8'); ?>"
+ title="Video 1" frameborder="0"
+ allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+ allowfullscreen>
+ </iframe>
+ </div>
+ </div>
+ </div>
+ </section>
+ <?php endif; ?>
+
+ <?php if($blog->isNotEmpty()): ?>
+ <section class="wrap-blog">
+ <div class="wrap-content">
+ <div class="title-main-home">
+ <h2>Tin Thời Trang</h2>
+ </div>
+ <div class="swiper swiper-auto"
+ data-swiper="slidesPerView:1|spaceBetween:10|breakpoints:{370: {slidesPerView:2,spaceBetween:10},575: {slidesPerView:2,spaceBetween:20},768: {slidesPerView:3,spaceBetween:20},992: {slidesPerView:3,spaceBetween:20}}|autoplay:{delay: 5000,pauseOnMouseEnter:true,disableOnInteraction:false}|speed:1000">
+ <div
+ class="swiper-wrapper row row-product row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 flex-nowrap gutter-x-20">
+ <?php $__currentLoopData = $blog; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $v): $loop = $this->incrementLoopIndices();  ?>
+ <div class="swiper-slide">
+ <?php  $this->startComponent('component.itemNews', ['news' => $v]); ?>
+ <p class="desc text-split"><?php echo \html_entity_decode($v['desc' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?></p>
+ <?php echo $this->renderComponent(); ?>
+ </div>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </div>
+ </div>
+ </div>
+ </section>
+ <?php endif; ?>
+
+
+ <?php /* <article>
+ <div class="wrap-content mb-4 mt-4">
+ <div class="flex-about">
+ <div class="content-about ">
+ <div class="title-about">
+ <h2><?php echo \html_entity_decode($about['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?></h2>
+ </div>
+ <?php echo Func::decodeHtmlChars($about['desc' . $lang]); ?>
+
+ <a href="gioi-thieu" class="view-about"><span><?php echo \html_entity_decode(__('web.xemthem')??'', ENT_QUOTES, 'UTF-8'); ?> &#8594;</span></a>
+ </div>
+ <div class="photo-about ">
+ <a class="scale-img img block" href="gioi-thieu" title="<?php echo \html_entity_decode($about['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?>">
+ <?php  $this->startComponent('component.image', [
+ 'rel' => 'preload',
+ 'class' => 'w-100',
+ 'w' => config('type.static.' . $about['type'] . '.images.photo.width'),
+ 'h' => config('type.static.' . $about['type'] . '.images.photo.height'),
+ 'z' => config('type.static.' . $about['type'] . '.images.photo.opt'),
+ 'breakpoints' => [
+ 400 => 400,
+ ],
+ 'is_watermarks' => false,
+ 'destination' => 'news',
+ 'image' => $about['photo'] ?? '',
+ 'alt' => $about['name' . $lang] ?? '',
+]); ?>
+ <?php echo $this->renderComponent(); ?>
+ </a>
+ </div>
+ </div>
+ </div>
+ </article>
+
+ <?php if($productNew->isNotEmpty()): ?>
+ <div id="" class="wrap-product-home padding-top-bottom load-home other-product"
+ data-url="<?php echo \html_entity_decode(url('load-product')??'', ENT_QUOTES, 'UTF-8'); ?>" data-section="home" data-type="san-pham" data-status="noibat"
+ data-paginate="4" data-other="1" data-slug="san-pham" data-eshow=".paging-product-home">
+ <div class="wrap-content">
+ <div class="title-main-home">
+ <h2><?php echo \html_entity_decode(__('web.sanphamnoibat')??'', ENT_QUOTES, 'UTF-8'); ?></h2>
+ </div>
+ <div class="paging-product-home"></div>
+ </div>
+ </div>
+ <?php endif; ?>
+ <?php if($productList->isNotEmpty()): ?>
+ <div id="" class="product-list load-prolist padding-top-bottom other-product">
+ <div class="wrap-content">
+ <div class="title-main-home">
+ <h2><?php echo \html_entity_decode(__('web.sanphamnoibat')??'', ENT_QUOTES, 'UTF-8'); ?></h2>
+ </div>
+ <div class="list-c2">
+ <div class="title-list-main click-product">
+ <?php $__currentLoopData = $productList; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $k => $vlist): $loop = $this->incrementLoopIndices();  ?>
+ <span class="" data-url="<?php echo \html_entity_decode(url('load-product')??'', ENT_QUOTES, 'UTF-8'); ?>" data-paginate="4" data-other="2"
+ data-slug="<?php echo \html_entity_decode($vlist['slug'.$lang]??'', ENT_QUOTES, 'UTF-8'); ?>" data-section="list" data-list="<?php echo \html_entity_decode($vlist['id']??'', ENT_QUOTES, 'UTF-8'); ?>"
+ data-eshow=".paging-prolist"><?php echo \html_entity_decode($vlist['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?></span>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </div>
+ <div class="sort-select" x-data="{ open: false }">
+ <p class="click-sort" @click="open = ! open"><?php echo \html_entity_decode(__('web.sapxep')??'', ENT_QUOTES, 'UTF-8'); ?>: <span
+ class="sort-show"><?php echo \html_entity_decode(__('web.moinhat')??'', ENT_QUOTES, 'UTF-8'); ?></span></p>
+ <div class="sort-select-main sort" x-show="open">
+ <p><span data-sort="1" class="active"><i></i><?php echo \html_entity_decode(__('web.moinhat')??'', ENT_QUOTES, 'UTF-8'); ?></span></p>
+ <p><span data-sort="2"><i></i><?php echo \html_entity_decode(__('web.cunhat')??'', ENT_QUOTES, 'UTF-8'); ?></span></p>
+ <p><span data-sort="3"><i></i><?php echo \html_entity_decode(__('web.giacaodenthap')??'', ENT_QUOTES, 'UTF-8'); ?></span></p>
+ <p><span data-sort="4"><i></i><?php echo \html_entity_decode(__('web.giathapdencao')??'', ENT_QUOTES, 'UTF-8'); ?></span></p>
+ </div>
+ </div>
+ </div>
+ <div class="paging-prolist"></div>
+ </div>
+ </div>
+ <?php endif; ?>
+ <?php if($productList->isNotEmpty()): ?>
+ <?php $__currentLoopData = $productList; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $vlist): $loop = $this->incrementLoopIndices();  ?>
+ <div class="list-product other-product">
+ <div class="wrap-content">
+ <div class="box-title flex justify-between items-center">
+ <div class="title-pro"><span><?php echo \html_entity_decode($vlist['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?></span></div>
+ <div class="list-c2">
+ <?php if(!empty($vlist->getCategoryCatsHome)): ?>
+ <div class="title-cat-main click-product">
+ <?php $__currentLoopData = $vlist->getCategoryCatsHome ?? []; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $k => $cat): $loop = $this->incrementLoopIndices();  ?>
+ <span class="" data-url="<?php echo \html_entity_decode(url('load-product')??'', ENT_QUOTES, 'UTF-8'); ?>"
+ data-cat="<?php echo \html_entity_decode($cat['id']??'', ENT_QUOTES, 'UTF-8'); ?>" data-list="<?php echo \html_entity_decode($vlist['id']??'', ENT_QUOTES, 'UTF-8'); ?>"
+ data-paginate="4" data-other="3" data-eshow=".list-<?php echo \html_entity_decode($vlist['id']??'', ENT_QUOTES, 'UTF-8'); ?>"
+ data-slug="<?php echo \html_entity_decode($cat['slug' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?>" data-type="san-pham" data-section="cat"
+ data-template="List">
+ <?php echo \html_entity_decode($cat['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </span>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </div>
+ <?php endif; ?>
+ </div>
+ </div>
+ <div class="paging-product list-<?php echo \html_entity_decode($vlist['id']??'', ENT_QUOTES, 'UTF-8'); ?>"></div>
+ </div>
+ </div>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ <?php endif; ?>
+
+ <?php if($blog->isNotEmpty()): ?>
+ <section>
+ <div class="info-main info-news">
+ <div class="wrap-content">
+ <div class="title-main">
+ <span>Tin tức</span>
+ </div>
+ <div class="swiper swiper-auto p-2"
+ data-swiper="slidesPerView:1|spaceBetween:10|breakpoints:{370: {slidesPerView:2,spaceBetween:10},575: {slidesPerView:2,spaceBetween:20},768: {slidesPerView:3,spaceBetween:20},992: {slidesPerView:3,spaceBetween:20}}|autoplay:{delay: 5000,pauseOnMouseEnter:true,disableOnInteraction:false}|speed:1000">
+ <div
+ class="swiper-wrapper row row-product row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 flex-nowrap gutter-x-20">
+ <?php $__currentLoopData = $blog; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $v): $loop = $this->incrementLoopIndices();  ?>
+ <div class="swiper-slide">
+ <?php  $this->startComponent('component.itemNews', ['news' => $v]); ?>
+ <p class="desc text-split"><?php echo \html_entity_decode($v['desc' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?></p>
+ <?php echo $this->renderComponent(); ?>
+ </div>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </div>
+ </div>
+ </div>
+ </div>
+ </section>
+ <?php endif; ?>
+
+ <?php if($video->isNotEmpty()): ?>
+ <section>
+ <div class="wrap-content my-3">
+ <div class="flex-video">
+ <div class="wr-video">
+ <div class="title-main mb-3"><span>Video</span></div>
+ <?php  $this->startComponent('component.videoSelect', ['video' => $video]); ?>
+ <?php echo $this->renderComponent(); ?>
+ </div>
+ <div class="wr-form">
+ <div class="title-main mb-3"><span><?php echo \html_entity_decode(__('web.dangkynhantin')??'', ENT_QUOTES, 'UTF-8'); ?></span></div>
+ <div class="frm_contact">
+ <form class="contact-form validation-letter" id="form-newsletter" novalidate method="post"
+ action="<?php echo \html_entity_decode(url('lien-he-post')??'', ENT_QUOTES, 'UTF-8'); ?>" enctype="multipart/form-data">
+ <div class="row-20 row">
+ <div class="contact-input mb-3">
+ <label for="fullname-contact" class="mb-2"><?php echo \html_entity_decode(__('web.hoten')??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ <span>(*)</span></label>
+ <div class="form-floating-cus">
+ <input type="text" name="dataContact[fullname]" class="form-control text-sm"
+ id="fullname-contact" placeholder="<?php echo \html_entity_decode(__('web.hoten')??'', ENT_QUOTES, 'UTF-8'); ?>" value=""
+ required>
+ </div>
+ </div>
+ <div class="contact-input mb-3">
+ <label for="phone-contact" class="mb-2"><?php echo \html_entity_decode(__('web.dienthoai')??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ <span>(*)</span></label>
+ <div class="form-floating-cus">
+ <input type="number" name="dataContact[phone]" id="phone-contact"
+ class="form-control text-sm" placeholder="<?php echo \html_entity_decode(__('web.dienthoai')??'', ENT_QUOTES, 'UTF-8'); ?>"
+ value="" required>
+ </div>
+ </div>
+ <div class="contact-input mb-3">
+ <label class="mb-2" for="email-contact">Email</label>
+ <div class="form-floating-cus">
+ <input type="email" class="form-control text-sm" id="email-contact"
+ name="dataContact[email]" placeholder="Email" value="">
+ </div>
+ </div>
+ </div>
+ <div class="contact-input mb-3">
+ <label class="mb-2" for="content-contact"><?php echo \html_entity_decode(__('web.bancanhotrogi')??'', ENT_QUOTES, 'UTF-8'); ?></label>
+ <div class="form-floating-cus">
+ <textarea id="content-contact" class="form-control text-sm" name="dataContact[content]"
+ placeholder="<?php echo \html_entity_decode(__('web.bancanhotrogi')??'', ENT_QUOTES, 'UTF-8'); ?>"></textarea>
+ </div>
+ </div>
+ <input type="hidden" name="dataContact[type]" value="lien-he">
+ <input type="hidden" name="csrf_token" value="<?php echo \html_entity_decode(csrf_token()??'', ENT_QUOTES, 'UTF-8'); ?>">
+ <input type="submit" class="btn btn-primary btn-submit mr-2" name="submit-contact"
+ value="<?php echo \html_entity_decode(__('web.guiyeucau')??'', ENT_QUOTES, 'UTF-8'); ?>">
+ <input type="hidden" name="recaptcha_response_contact" id="recaptchaResponseNewsletter">
+ </form>
+ </div>
+ </div>
+ </div>
+ </div>
+ </section>
+ <?php endif; ?>
+
+ <?php if($partner->isNotEmpty()): ?>
+ <section>
+ <div class="wrap-content mb-4 mt-4">
+ <div class="swiper swiper-auto"
+ data-swiper="slidesPerView:3|spaceBetween:10|breakpoints:{370: {slidesPerView:3,spaceBetween:10},575: {slidesPerView:4,spaceBetween:20},768: {slidesPerView:5,spaceBetween:20},992: {slidesPerView:6,spaceBetween:20}}|autoplay:{delay: 5000,pauseOnMouseEnter:true,disableOnInteraction:false}|speed:1000">
+ <div
+ class="swiper-wrapper row row-product row-cols-3 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 flex-nowrap gutter-x-20">
+ <?php $__currentLoopData = $partner; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $k => $v): $loop = $this->incrementLoopIndices();  ?>
+ <div class="swiper-slide col">
+ <a class="item-partner  scale-img" href="<?php echo \html_entity_decode($v['link']??'', ENT_QUOTES, 'UTF-8'); ?>"
+ title="<?php echo \html_entity_decode($v['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?>">
+ <?php  $this->startComponent('component.image', [
+ 'class' => 'w-100',
+ 'w' => config('type.photo.' . $v['type'] . '.width'),
+ 'h' => config('type.photo.' . $v['type'] . '.height'),
+ 'z' => config('type.photo.' . $v['type'] . '.opt'),
+ 'breakpoints' => [
+ 400 => 200,
+ ],
+ 'is_watermarks' => false,
+ 'destination' => 'photo',
+ 'image' => $v['photo'] ?? '',
+ 'alt' => $v['name' . $lang] ?? '',
+]); ?>
+ <?php echo $this->renderComponent(); ?>
+ </a>
+ </div>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </div>
+ <div class="swiper-pagination -pagination"></div>
+ <div class="swiper-button-prev -prev"></div>
+ <div class="swiper-button-next -next"></div>
+ </div>
+ </div>
+ </section>
+ <?php endif; ?>
+
+ <?php if($tags->isNotEmpty()): ?>
+ <section>
+ <div class="footer-tags">
+ <div class="wrap-content py-[15px]">
+ <p class="title-tags"><?php echo \html_entity_decode(__('web.tagsanpham')??'', ENT_QUOTES, 'UTF-8'); ?></p>
+ <div class="flex-tags">
+ <?php $__currentLoopData = $tags; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $v): $loop = $this->incrementLoopIndices();  ?>
+ <a href="<?php echo \html_entity_decode($v[$sluglang]??'', ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo \html_entity_decode($v['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?>"><?php echo \html_entity_decode($v['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?></a>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </div>
+ </div>
+ </div>
+ </section>
+ <?php endif; ?>*/ ?>
+<?php $this->stopSection(); ?>
+
+<?php if (isset($_shouldextend[1])) { echo $this->runChild('layout'); } ?>

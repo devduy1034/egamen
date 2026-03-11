@@ -1,0 +1,67 @@
+<!-- Js Config -->
+<script type="text/javascript">
+ var PHP_VERSION = <?php echo \html_entity_decode(PHP_VERSION_ID??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var CONFIG_BASE = "<?php echo \html_entity_decode(config('app.admin')??'', ENT_QUOTES, 'UTF-8'); ?>";
+ var ADMIN = '<?php echo \html_entity_decode(config('app.admin')??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var ASSET = '<?php echo \html_entity_decode(config('app.asset')??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var TOKEN = '<?php echo \html_entity_decode(config('app.token')??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var SLUG_LANG = <?php echo json_encode(implode(', ', array_keys(config('app.slugs')))); ?>;
+ var CSRF_TOKEN = '<?php echo \html_entity_decode(csrf_token()??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var LINK_FILTER = '<?php echo \html_entity_decode(url('admin',['com'=>$com,'act'=>'man','type'=>$type])??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var ID = <?php echo \html_entity_decode(!empty($id) ? $id : 0??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var COM = '<?php echo \html_entity_decode(!empty($com) ? $com : ''??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var ACT = '<?php echo \html_entity_decode(!empty($act) ? $act : ''??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var TYPE = '<?php echo \html_entity_decode(!empty($type) ? $type : ''??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var HASH = '<?php echo \html_entity_decode(Func::generateHash()??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var TYPE_IMG = "<?php echo \html_entity_decode(str_replace(',', '|', config('type.type_img'))??'', ENT_QUOTES, 'UTF-8'); ?>";
+ var TYPE_FILE = "<?php echo \html_entity_decode(str_replace(',', '|', config('type.type_file'))??'', ENT_QUOTES, 'UTF-8'); ?>";
+ var TYPE_VIDEO = "<?php echo \html_entity_decode(str_replace(',', '|', config('type.type_video'))??'', ENT_QUOTES, 'UTF-8'); ?>";
+ var ACTIVE_GALLERY = <?php echo \html_entity_decode(!empty($gallery) ? 'true' : 'false'??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var ACTIVE_PROPERTIES_CATEGORIES = <?php echo \html_entity_decode(!empty($configType->categoriesProperties) ? 'true' : 'false'??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var BASE64_QUERY_STRING = '<?php echo \html_entity_decode(base64_encode($_SERVER['QUERY_STRING'])??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var LOGIN_PAGE = <?php echo \html_entity_decode(empty($_SESSION['admin_login']['active']) ? 'true' : 'false'??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var MAX_DATE = '<?php echo \html_entity_decode(date('Y/m/d', time())??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var CHARTS = <?php echo !empty($charts) ? json_encode($charts) : '{}'; ?>;
+ var ADD_OR_EDIT_PERMISSIONS =
+ <?php echo \html_entity_decode(!empty($com) && $com == 'user' && !empty($act) && in_array($act, ['add_permission_group', 'edit_permission_group']) ? 'true' : 'false'??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var IMPORT_IMAGE_EXCELL =
+ <?php echo \html_entity_decode(!empty($com) && $com == 'import' && !empty($config['import']['images']) ? 'true' : 'false'??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var ORDER_ADVANCED_SEARCH =
+ <?php echo \html_entity_decode(!empty($com) && $com == 'order' && !empty($configMan->search) ? 'true' : 'false'??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var ORDER_MIN_TOTAL = <?php echo \html_entity_decode(!empty($minTotal) ? $minTotal : 1??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var ORDER_MAX_TOTAL = <?php echo \html_entity_decode(!empty($maxTotal) ? $maxTotal : 1??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var ORDER_PRICE_FROM = <?php echo \html_entity_decode(!empty($price_from) ? $price_from : 1??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var ORDER_PRICE_TO = <?php echo \html_entity_decode(!empty($price_to) ? $price_to : (!empty($maxTotal) ? $maxTotal : 1)??'', ENT_QUOTES, 'UTF-8'); ?>;
+</script>
+
+<!-- build -->
+<script src="<?php echo (isset($this->assetDict[('assets/admin/vendor/libs/jquery/jquery.js')]))?$this->assetDict[('assets/admin/vendor/libs/jquery/jquery.js')]:$this->baseUrl.'/'.('assets/admin/vendor/libs/jquery/jquery.js'); ?>"></script>
+<?php /* <script src="<?php echo (isset($this->assetDict[('assets/admin/vendor/libs/popper/popper.js')]))?$this->assetDict[('assets/admin/vendor/libs/popper/popper.js')]:$this->baseUrl.'/'.('assets/admin/vendor/libs/popper/popper.js'); ?>"></script> */ ?>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/vendor/js/bootstrap.js')]))?$this->assetDict[('assets/admin/vendor/js/bootstrap.js')]:$this->baseUrl.'/'.('assets/admin/vendor/js/bootstrap.js'); ?>"></script>
+<?php /* <script src="<?php echo (isset($this->assetDict[('assets/admin/vendor/libs/node-waves/node-waves.js')]))?$this->assetDict[('assets/admin/vendor/libs/node-waves/node-waves.js')]:$this->baseUrl.'/'.('assets/admin/vendor/libs/node-waves/node-waves.js'); ?>"></script> */ ?>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/vendor/libs/perfect-scrollbar/perfect-scrollbar.js')]))?$this->assetDict[('assets/admin/vendor/libs/perfect-scrollbar/perfect-scrollbar.js')]:$this->baseUrl.'/'.('assets/admin/vendor/libs/perfect-scrollbar/perfect-scrollbar.js'); ?>"></script>
+<?php /* <script src="<?php echo (isset($this->assetDict[('assets/admin/vendor/libs/hammer/hammer.js')]))?$this->assetDict[('assets/admin/vendor/libs/hammer/hammer.js')]:$this->baseUrl.'/'.('assets/admin/vendor/libs/hammer/hammer.js'); ?>"></script> */ ?>
+
+<script src="<?php echo (isset($this->assetDict[('assets/admin/vendor/libs/typeahead-js/typeahead.js')]))?$this->assetDict[('assets/admin/vendor/libs/typeahead-js/typeahead.js')]:$this->baseUrl.'/'.('assets/admin/vendor/libs/typeahead-js/typeahead.js'); ?>"></script>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/vendor/js/menu.js')]))?$this->assetDict[('assets/admin/vendor/js/menu.js')]:$this->baseUrl.'/'.('assets/admin/vendor/js/menu.js'); ?>"></script>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/vendor/libs/select2/select2.js')]))?$this->assetDict[('assets/admin/vendor/libs/select2/select2.js')]:$this->baseUrl.'/'.('assets/admin/vendor/libs/select2/select2.js'); ?>" defer></script>
+<!-- Main JS -->
+<script src="<?php echo (isset($this->assetDict[('assets/admin/js/moment.min.js')]))?$this->assetDict[('assets/admin/js/moment.min.js')]:$this->baseUrl.'/'.('assets/admin/js/moment.min.js'); ?>"></script>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/confirm/confirm.js')]))?$this->assetDict[('assets/admin/confirm/confirm.js')]:$this->baseUrl.'/'.('assets/admin/confirm/confirm.js'); ?>"></script>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/js/priceFormat.js')]))?$this->assetDict[('assets/admin/js/priceFormat.js')]:$this->baseUrl.'/'.('assets/admin/js/priceFormat.js'); ?>" defer></script>
+<script src="<?php echo (isset($this->assetDict[('assets/holdon/HoldOn.js')]))?$this->assetDict[('assets/holdon/HoldOn.js')]:$this->baseUrl.'/'.('assets/holdon/HoldOn.js'); ?>"></script>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/simplenotify/simple-notify.js')]))?$this->assetDict[('assets/admin/simplenotify/simple-notify.js')]:$this->baseUrl.'/'.('assets/admin/simplenotify/simple-notify.js'); ?>"></script>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/fancybox5/fancybox.umd.js')]))?$this->assetDict[('assets/admin/fancybox5/fancybox.umd.js')]:$this->baseUrl.'/'.('assets/admin/fancybox5/fancybox.umd.js'); ?>"></script>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/fancybox5/fancybox.umd.js')]))?$this->assetDict[('assets/admin/fancybox5/fancybox.umd.js')]:$this->baseUrl.'/'.('assets/admin/fancybox5/fancybox.umd.js'); ?>"></script>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/js/cropper.js')]))?$this->assetDict[('assets/admin/js/cropper.js')]:$this->baseUrl.'/'.('assets/admin/js/cropper.js'); ?>"></script>
+
+<?php if(!empty($com) && $com == 'newsletters'): ?>
+ <script src="<?php echo (isset($this->assetDict[('assets/admin/js/app-email.js')]))?$this->assetDict[('assets/admin/js/app-email.js')]:$this->baseUrl.'/'.('assets/admin/js/app-email.js'); ?>"></script>
+<?php endif; ?>
+
+<script src="<?php echo (isset($this->assetDict[('assets/admin/toastify/toastify.js')]))?$this->assetDict[('assets/admin/toastify/toastify.js')]:$this->baseUrl.'/'.('assets/admin/toastify/toastify.js'); ?>" defer></script>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/js/apps.js')]))?$this->assetDict[('assets/admin/js/apps.js')]:$this->baseUrl.'/'.('assets/admin/js/apps.js'); ?>" defer></script>
+<script src="<?php echo (isset($this->assetDict[('assets/js/alpinejs.js')]))?$this->assetDict[('assets/js/alpinejs.js')]:$this->baseUrl.'/'.('assets/js/alpinejs.js'); ?>" defer></script>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/js/main.js')]))?$this->assetDict[('assets/admin/js/main.js')]:$this->baseUrl.'/'.('assets/admin/js/main.js'); ?>"></script>
+<script src="<?php echo (isset($this->assetDict[('assets/admin/js/main_crop.js')]))?$this->assetDict[('assets/admin/js/main_crop.js')]:$this->baseUrl.'/'.('assets/admin/js/main_crop.js'); ?>"></script>
+<?php echo $this->yieldPushContent('scripts'); ?>

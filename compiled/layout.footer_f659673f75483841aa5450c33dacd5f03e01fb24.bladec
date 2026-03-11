@@ -1,0 +1,92 @@
+<footer>
+ <div class="info-footer">
+ <div class="wrap-content">
+ <div class="flex-footer">
+ <div class="box-footer">
+ <a class="logo-footer" href="">
+ <?php  $this->startComponent('component.image', [
+ 'class' => '',
+ 'w' => config('type.static.' . $footer['type'] . '.images.photo.width'),
+ 'h' => config('type.static.' . $footer['type'] . '.images.photo.height'),
+ 'z' => config('type.static.' . $footer['type'] . '.images.photo.opt'),
+ 'is_watermarks' => false,
+ 'destination' => 'news',
+ 'image' => $footer['photo'] ?? '',
+ 'alt' => $setting['name' . $lang] ?? '',
+ ]); ?>
+ <?php echo $this->renderComponent(); ?>
+ </a>
+ <div class="title-footer"><?php echo \html_entity_decode($footer['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?></div>
+ <div class="desc-footer">
+ <?php echo Func::decodeHtmlChars($footer['content' . $lang] ?? ''); ?>
+
+ </div>
+ </div>
+
+ <div class="box-footer">
+ <div class="title-footer">Giới thiệu & Thông tin</div>
+ <ul class="footer-ul d-flex flex-wrap justify-content-between">
+ <li>
+ <a class="text-decoration-none" href="gioi-thieu" title="Giới thiệu">
+ <i class="fa-solid fa-angle-right"></i> Giới thiệu
+ </a>
+ </li>
+ <li>
+ <a class="text-decoration-none" href="he-thuong-cua-hang" title="Hệ thống cửa hàng">
+ <i class="fa-solid fa-angle-right"></i> Hệ thống cửa hàng
+ </a>
+ </li>
+ <li>
+ <a class="text-decoration-none" href="cau-hoi-thuong-gap" title="Câu hỏi thường gặp">
+ <i class="fa-solid fa-angle-right"></i> Câu hỏi thường gặp
+ </a>
+ </li>
+ </ul>
+ </div>
+
+ <div class="box-footer">
+ <div class="title-footer">Hỗ trợ khách hàng</div>
+ <ul class="footer-ul d-flex flex-wrap justify-content-between">
+ <li>
+ <a class="text-decoration-none" href="lien-he" title="Liên hệ">
+ <i class="fa-solid fa-angle-right"></i> Liên hệ
+ </a>
+ </li>
+ <?php $__currentLoopData = $support; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $v): $loop = $this->incrementLoopIndices();  ?>
+ <li>
+ <a class="text-decoration-none" href="<?php echo \html_entity_decode($v[$sluglang]??'', ENT_QUOTES, 'UTF-8'); ?>"
+ title="<?php echo \html_entity_decode($v['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?>">
+ <i class="fa-solid fa-angle-right"></i> <?php echo \html_entity_decode($v['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </a>
+ </li>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </ul>
+ </div>
+
+ <div class="box-footer">
+ <div class="title-footer">Fanpage</div>
+ <?php echo $this->runChild('component.fanpage', ['fanpage' => $optSetting['fanpage']]); ?>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <div class="footer-powered">
+ <div class="wrap-content">
+ <div class="flex-powered">
+ <div class="copyright">
+ Copyright © 2026 - <?php echo \html_entity_decode($setting['name' . $lang]??'', ENT_QUOTES, 'UTF-8'); ?>. All rights reserved.
+ </div>
+ <div class="statistic">
+ <span><?php echo \html_entity_decode(__('web.dangonline')??'', ENT_QUOTES, 'UTF-8'); ?>: <?php echo \html_entity_decode(Statistic::getOnline()??'', ENT_QUOTES, 'UTF-8'); ?></span>
+ <span><?php echo \html_entity_decode(__('web.truycapngay')??'', ENT_QUOTES, 'UTF-8'); ?>: <?php echo \html_entity_decode(Statistic::getTodayRecord()??'', ENT_QUOTES, 'UTF-8'); ?></span>
+ <span><?php echo \html_entity_decode(__('web.trongtuan')??'', ENT_QUOTES, 'UTF-8'); ?>: <?php echo \html_entity_decode(Statistic::getWeekRecord()??'', ENT_QUOTES, 'UTF-8'); ?></span>
+ <span><?php echo \html_entity_decode(__('web.trongthang')??'', ENT_QUOTES, 'UTF-8'); ?>: <?php echo \html_entity_decode(Statistic::getMonthRecord()??'', ENT_QUOTES, 'UTF-8'); ?></span>
+ <span><?php echo \html_entity_decode(__('web.tongtruycap')??'', ENT_QUOTES, 'UTF-8'); ?>: <?php echo \html_entity_decode(Statistic::getTotalRecord()??'', ENT_QUOTES, 'UTF-8'); ?></span>
+ </div>
+ </div>
+ </div>
+ </div>
+</footer>

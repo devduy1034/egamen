@@ -1,0 +1,27 @@
+<?php if(!empty($extHotline)): ?>
+ <?php $optHotline = json_decode($extHotline['options'], true);  ?>
+ <?php  $this->startComponent('component.hotline.' . $optHotline['hotline'], ['val' => $extHotline, 'opt' => $optHotline]); ?>
+ <?php echo $this->renderComponent(); ?>
+<?php endif; ?>
+
+<?php if(!empty($extSocial) && !empty($social)): ?>
+
+ <?php $optSocial = json_decode($extSocial['options'], true);  ?>
+
+ <?php $__currentLoopData = $optSocial; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $k => $value): $loop = $this->incrementLoopIndices();  ?>
+ <?php if(!empty($value['status'])): ?>
+ <?php  $this->startComponent('component.social.' . $k, ['val' => $value, 'mxh' => $social]); ?>
+ <?php echo $this->renderComponent(); ?>
+ <?php endif; ?>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+<?php endif; ?>
+
+<?php if(!empty($extPopup)): ?>
+ <?php 
+ $optPopup = json_decode($extPopup['options'], true);
+ $template = $optPopup['type'] == 1 ? 'popup' : $optPopup['popup'];
+ ?>
+ <?php  $this->startComponent('component.popup.' . $template, ['val' => $extPopup, 'opt' => $optPopup]); ?>
+ <?php echo $this->renderComponent(); ?>
+<?php endif; ?>

@@ -1,0 +1,43 @@
+<div class="d-flex justify-content-between flex-wrap">
+ <?php 
+ $cat = $productAjax->first()?->getCategoryCat;
+ ?>
+ <div class="left-product-list-home">
+ <a class="pic-product-list-home d-block" href="<?php echo \html_entity_decode($cat?->{'slug' . $lang}??'', ENT_QUOTES, 'UTF-8'); ?>"
+ title="<?php echo \html_entity_decode($cat?->{'name' . $lang}??'', ENT_QUOTES, 'UTF-8'); ?>">
+ <?php  $this->startComponent('component.image', [
+ 'rel' => 'preload',
+ 'class' => 'w-100',
+ 'w' => config('type.product.' . ($cat?->type ?? '') . '.categories.cat.images.photo1.width'),
+ 'h' => config('type.product.' . ($cat?->type ?? '') . '.categories.cat.images.photo1.height'),
+ 'z' => config('type.product.' . ($cat?->type ?? '') . '.categories.cat.images.photo1.opt'),
+ 'is_watermarks' => false,
+ 'destination' => 'product',
+ 'image' => $cat?->photo1 ?? '',
+ 'alt' => $cat?->{'name' . $lang} ?? '',
+ ]); ?>
+ <?php echo $this->renderComponent(); ?>
+ </a>
+ </div>
+ <div class="right-product-list-home">
+ <?php if($productAjax->isNotEmpty()): ?>
+ <div class="p-relative">
+ <div class="swiper swiper-auto"
+ data-swiper="slidesPerView:1|spaceBetween:10|breakpoints:{370: {slidesPerView:2,spaceBetween:10},575: {slidesPerView:2,spaceBetween:20},768: {slidesPerView:3,spaceBetween:20},992: {slidesPerView:<?php echo \html_entity_decode($paginate??'', ENT_QUOTES, 'UTF-8'); ?>,spaceBetween:12}}|autoplay:{delay: 5000,pauseOnMouseEnter:true,disableOnInteraction:false}|speed:1000|navigation:{nextEl:'.proajaxcat-next',prevEl:'.proajaxcat-prev'}">
+ <div
+ class="swiper-wrapper row row-product row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-<?php echo \html_entity_decode($paginate??'', ENT_QUOTES, 'UTF-8'); ?> flex-nowrap gutter-x-12">
+ <?php $__currentLoopData = $productAjax; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $k => $v): $loop = $this->incrementLoopIndices();  ?>
+ <div class="swiper-slide col">
+ <?php  $this->startComponent('component.itemProduct', ['product' => $v]); ?>
+ <?php echo $this->renderComponent(); ?>
+ </div>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </div>
+ <div class="swiper-button-prev proajaxcat-prev"></div>
+ <div class="swiper-button-next proajaxcat-next"></div>
+ </div>
+ </div>
+ <?php endif; ?>
+ </div>
+</div>

@@ -1,0 +1,29 @@
+<?php $_shouldextend[1]=1; ?>
+<?php $this->startSection('content'); ?>
+ <section class="order-success-page py-5">
+ <div class="container">
+ <div class="order-success-card">
+ <h1 class="order-success-title"><?php echo \html_entity_decode($titleMain ?? 'Đặt hàng thành công!'??'', ENT_QUOTES, 'UTF-8'); ?></h1>
+ <p class="order-success-subtitle">
+ <?php echo \html_entity_decode($subtitle ?? 'Cảm ơn bạn. Đơn hàng của bạn đã được ghi nhận.'??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </p>
+ <div class="order-success-meta">
+ <p><strong>Mã đơn hàng:</strong> <span><?php echo \html_entity_decode($orderCode ?? '-'??'', ENT_QUOTES, 'UTF-8'); ?></span></p>
+ <p><strong>Trạng thái:</strong> <span><?php echo \html_entity_decode($paymentStatusText ?? '-'??'', ENT_QUOTES, 'UTF-8'); ?></span></p>
+ <p><strong>Thời gian:</strong> <span><?php echo \html_entity_decode($createdAtText ?? '-'??'', ENT_QUOTES, 'UTF-8'); ?></span></p>
+ </div>
+ <p class="order-success-mail">Thông tin đơn hàng đã được gửi đến email của quý khách.</p>
+ <div class="order-success-actions">
+ <a class="btn btn-primary" href="<?php echo \html_entity_decode($homeUrl ?? url('home')??'', ENT_QUOTES, 'UTF-8'); ?>">Trở về trang chủ</a>
+ <a class="btn btn-outline-primary"
+ href="<?php echo \html_entity_decode($orderLookupUrl ?? url('user.account', null, ['section' => 'orders'])??'', ENT_QUOTES, 'UTF-8'); ?>">
+ Kiểm tra đơn hàng
+ </a>
+ </div>
+ </div>
+ </div>
+ </section>
+<?php $this->stopSection(); ?>
+
+<?php if (isset($_shouldextend[1])) { echo $this->runChild('layout'); } ?>

@@ -1,0 +1,258 @@
+<?php $_shouldextend[1]=1; ?>
+<?php $this->startSection('content'); ?>
+ <div class="container-xxl flex-grow-1 container-p-y container-fluid">
+ <h4>
+ <span>Quản lý</span>/<span class="text-muted fw-light"></span><?php echo \html_entity_decode($configMan->title_main??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </h4>
+ <?php  $this->startComponent('component.buttonMan'); ?>
+ <?php echo $this->renderComponent(); ?>
+ <?php if(Func::chekcPermission($tb . '.import.' . $type . '.man', $permissions)): ?>
+ <?php if(!empty($configMan->excel->import)): ?>
+ <?php  $this->startComponent('component.excelImport', [
+ 'url' => 'product-import/man/' . $type,
+ 'title' => $configMan->excel->import->title_main_excel,
+ ]); ?>
+ <?php echo $this->renderComponent(); ?>
+ <?php endif; ?>
+ <?php endif; ?>
+ <div class="card pd-15 bg-main mb-3">
+ <div class="col-md-3">
+ <?php  $this->startComponent('component.inputSearch', ['title' => 'Tìm kiếm danh mục']); ?>
+ <?php echo $this->renderComponent(); ?>
+ </div>
+ </div>
+ <?php if(!empty($configMan->categories)): ?>
+ <div class="card pd-15 bg-main mb-3">
+ <div class="row">
+ <?php if(!empty($configMan->categories->list)): ?>
+ <div class="form-group col-md-3 last:!mb-0 md:!mb-0">
+ <?php echo Func::getLinkCategory('product_list', 'list', $type, 'Danh mục cấp 1'); ?>
+
+ </div>
+ <?php endif; ?>
+ <?php if(!empty($configMan->categories->cat)): ?>
+ <div class="form-group col-md-3 last:!mb-0 md:!mb-0">
+ <?php echo Func::getLinkCategory('product_cat', 'cat', $type, 'Danh mục cấp 2'); ?>
+
+ </div>
+ <?php endif; ?>
+ <?php if(!empty($configMan->categories->item)): ?>
+ <div class="form-group col-md-3 last:!mb-0 md:!mb-0">
+ <?php echo Func::getLinkCategory('product_item', 'item', $type, 'Danh mục cấp 3'); ?>
+
+ </div>
+ <?php endif; ?>
+ <?php if(!empty($configMan->categories->sub)): ?>
+ <div class="form-group col-md-3 last:!mb-0 md:!mb-0">
+ <?php echo Func::getLinkCategory('product_sub', 'sub', $type, 'Danh mục cấp 4'); ?>
+
+ </div>
+ <?php endif; ?>
+ </div>
+ </div>
+ <?php endif; ?>
+ <div class="card">
+
+ <div class="card-datatable table-responsive">
+ <table class="datatables-category-list table border-top text-sm">
+ <thead>
+ <tr>
+ <th class="align-middle w-[60px]">
+ <div class="custom-control custom-checkbox my-checkbox">
+ <input
+ <?php echo \html_entity_decode(!isPermissions(str_replace('-', '.', $com) . '.' . $type . '.delete') ? 'disabled' : ''??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ type="checkbox" class="form-check-input" id="selectall-checkbox">
+ </div>
+ </th>
+ <th class="text-center w-[70px] !pl-0">STT</th>
+ <th width="20%">Tiêu đề</th>
+ <?php if(!empty($configMan->show_images)): ?>
+ <th>Hình ảnh</th>
+ <?php endif; ?>
+ <?php if(!empty($configMan->gallery)): ?>
+ <th>Gallery</th>
+ <?php endif; ?>
+ <?php if(!empty($configMan->posts)): ?>
+ <th>Bài viết</th>
+ <?php endif; ?>
+ <?php $__currentLoopData = $configMan->status ?? []; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $key => $value): $loop = $this->incrementLoopIndices();  ?>
+ <th class="text-lg-center text-center"><?php echo \html_entity_decode($value??'', ENT_QUOTES, 'UTF-8'); ?></th>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ <th class="text-lg-center text-center">Thao tác</th>
+ </tr>
+ </thead>
+ <tbody>
+
+ <?php $__empty_1 = true; foreach($items as $k => $v): $__empty_1 = false; ?>
+ <tr>
+ <td class="align-middle">
+ <div class="custom-control custom-checkbox my-checkbox">
+ <input
+ <?php echo \html_entity_decode(!isPermissions(str_replace('-', '.', $com) . '.' . $type . '.delete') ? 'disabled' : ''??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ type="checkbox" class="form-check-input" id="select-checkbox1"
+ value="<?php echo \html_entity_decode($v['id']??'', ENT_QUOTES, 'UTF-8'); ?>">
+ </div>
+ </td>
+ <td class="align-middle w-[70px] !pl-0">
+ <?php  $this->startComponent('component.inputNumb', ['numb' => $v['numb'], 'idtbl' => $v['id'], 'table' => 'product']); ?>
+ <?php echo $this->renderComponent(); ?>
+ </td>
+ <td class="align-middle">
+
+ <?php  $this->startComponent('component.name', [
+ 'slug' => $v['slug'.config('app.lang_default')],
+ 'name' => $v['name'. config('app.lang_default')],
+ 'params' => [
+ 'id' => $v['id'],
+ 'id_list' => $v['id_list'],
+ 'id_cat' => $v['id_cat'],
+ 'id_item' => $v['id_item'],
+ 'id_sub' => $v['id_sub'],
+ 'id_brand' => $v['id_brand'],
+ ],
+ ]); ?>
+ <?php echo $this->renderComponent(); ?>
+ <div class="tool-action mt-2 w-clear">
+ <?php  $this->startComponent('component.buttonAction', [
+ 'slug' => $v['slug'. config('app.lang_default')],
+ 'params' => [
+ 'id' => $v['id'],
+ 'id_list' => $v['id_list'],
+ 'id_cat' => $v['id_cat'],
+ 'id_item' => $v['id_item'],
+ 'id_sub' => $v['id_sub'],
+ 'id_brand' => $v['id_brand'],
+ ],
+ ]); ?>
+ <div class="dropdown">
+ <a id="dropdownCopy" data-url="<?php echo \html_entity_decode(url('copy')??'', ENT_QUOTES, 'UTF-8'); ?>"
+ data-id="<?php echo \html_entity_decode($v['id']??'', ENT_QUOTES, 'UTF-8'); ?>" data-table="product"
+ data-com="<?php echo \html_entity_decode($com??'', ENT_QUOTES, 'UTF-8'); ?>" data-type="<?php echo \html_entity_decode($type??'', ENT_QUOTES, 'UTF-8'); ?>"
+ class="nav-link text-success mr-2"><i class="ti ti-copy"></i>Copy</a>
+ </div>
+ <?php if(!empty($configMan->copy)): ?>
+ <?php if (call_user_func($this->authCallBack,str_replace('-', '.', $com) . '.' . $type . '.edit')): ?>
+ <div class="dropdown">
+ <a id="dropdownCopy" data-url="<?php echo \html_entity_decode(url('copy')??'', ENT_QUOTES, 'UTF-8'); ?>"
+ data-id="<?php echo \html_entity_decode($v['id']??'', ENT_QUOTES, 'UTF-8'); ?>" data-table="product"
+ data-com="<?php echo \html_entity_decode($com??'', ENT_QUOTES, 'UTF-8'); ?>" data-type="<?php echo \html_entity_decode($type??'', ENT_QUOTES, 'UTF-8'); ?>"
+ class="nav-link text-success mr-2"><i class="ti ti-copy"></i>Copy</a>
+ </div>
+ <?php endif; ?>
+ <?php endif; ?>
+ <?php if(!empty($configMan->properties) && !empty(Func::checkPhotoProperties($v['list_properties']))): ?>
+ <a
+ href="<?php echo \html_entity_decode(url('admin', ['com' => 'product-photo', 'act' => 'man', 'type' => $type], ['id_product' => $v['id']])??'', ENT_QUOTES, 'UTF-8'); ?>">
+ <svg xmlns="http://www.w3.org/2000/svg"
+ class="icon icon-tabler icon-tabler-photo-circle-plus" width="18"
+ height="18" viewBox="0 0 24 24" stroke-width="1.5"
+ stroke="currentColor" fill="none" stroke-linecap="round"
+ stroke-linejoin="round">
+ <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+ <path d="M15 8h.01" />
+ <path
+ d="M20.964 12.806a9 9 0 0 0 -8.964 -9.806a9 9 0 0 0 -9 9a9 9 0 0 0 9.397 8.991" />
+ <path d="M4 15l4 -4c.928 -.893 2.072 -.893 3 0l4 4" />
+ <path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0" />
+ <path d="M16 19.33h6" />
+ <path d="M19 16.33v6" />
+ </svg>
+ Thêm ảnh
+ </a>
+ <?php endif; ?>
+ <?php echo $this->renderComponent(); ?>
+ </div>
+ </td>
+ <?php if(!empty($configMan->show_images)): ?>
+ <td class="align-middle">
+ <img class="img-preview" onerror=this.src="<?php echo (isset($this->assetDict[('assets/images/noimage.png')]))?$this->assetDict[('assets/images/noimage.png')]:$this->baseUrl.'/'.('assets/images/noimage.png'); ?>";
+ src="<?php echo \html_entity_decode(assets_photo('product', '70x70x1', $v['photo'], 'thumbs')??'', ENT_QUOTES, 'UTF-8'); ?>"
+ alt="<?php echo \html_entity_decode($v['name'. config('app.lang_default')]??'', ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo \html_entity_decode($v['name'. config('app.lang_default')]??'', ENT_QUOTES, 'UTF-8'); ?>" />
+ </td>
+ <?php endif; ?>
+ <?php if(!empty($configMan->gallery)): ?>
+ <td class="align-middle">
+ <div class="dropdown btn-dropdown">
+ <button class="btn btn-secondary dropdown-toggle" type="button"
+ id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+ Thêm ảnh
+ </button>
+ <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+ <?php $__currentLoopData = $configMan->gallery; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $key => $vgallery): $loop = $this->incrementLoopIndices();  ?>
+ <li><a class="dropdown-item"
+ href="<?php echo \html_entity_decode(url('admin', ['com' => 'product-album', 'act' => 'man', 'type' => $type], ['gallery' => $key, 'id_parent' => $v['id']])??'', ENT_QUOTES, 'UTF-8'); ?>"><?php echo \html_entity_decode($vgallery->title_main_photo??'', ENT_QUOTES, 'UTF-8'); ?></a>
+ </li>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </ul>
+ </div>
+ </td>
+ <?php endif; ?>
+ <?php if(!empty($configMan->posts)): ?>
+ <td class="align-middle">
+ <div class="dropdown btn-dropdown">
+ <button class="btn btn-secondary dropdown-toggle" type="button"
+ id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+ Thêm bài viết
+ </button>
+ <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+ <?php $__currentLoopData = $configMan->posts; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $key => $vposts): $loop = $this->incrementLoopIndices();  ?>
+ <li><a class="dropdown-item"
+ href="<?php echo \html_entity_decode(url('admin', ['com' => 'news', 'act' => 'man', 'type' => $key], ['id_parent' => $v['id']])??'', ENT_QUOTES, 'UTF-8'); ?>"><?php echo \html_entity_decode($vposts??'', ENT_QUOTES, 'UTF-8'); ?></a>
+ </li>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </ul>
+ </div>
+ </td>
+ <?php endif; ?>
+ <?php $__currentLoopData = $configMan->status ?? []; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $key => $value): $loop = $this->incrementLoopIndices();  ?>
+ <?php $status_array = (!empty($v['status'])) ? explode(',', $v['status']) : array();  ?>
+ <td class="align-middle text-center">
+ <label class="switch switch-success">
+ <?php  $this->startComponent('component.switchButton', [
+ 'keyC' => $key,
+ 'idC' => $v['id'],
+ 'tableC' => 'product',
+ 'status_arrayC' => $status_array,
+ ]); ?>
+ <?php echo $this->renderComponent(); ?>
+ </label>
+ </td>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ <td class="align-middle text-center">
+ <?php  $this->startComponent('component.buttonList', [
+ 'params' => [
+ 'id' => $v['id'],
+ 'id_list' => $v['id_list'],
+ 'id_cat' => $v['id_cat'],
+ 'id_item' => $v['id_item'],
+ 'id_sub' => $v['id_sub'],
+ 'id_brand' => $v['id_brand'],
+ ],
+ ]); ?>
+ <?php echo $this->renderComponent(); ?>
+ </td>
+ </tr>
+ <?php endforeach; if ($__empty_1): ?>
+ <tr>
+ <td colspan="100" class="text-center">Không có dữ liệu</td>
+ </tr>
+ <?php endif; ?>
+ </tbody>
+ </table>
+ </div>
+ </div>
+ <?php echo $items->appends(request()->query())->links(); ?>
+
+ <?php  $this->startComponent('component.buttonMan'); ?>
+ <?php echo $this->renderComponent(); ?>
+ </div>
+<?php $this->stopSection(); ?>
+
+<?php if (isset($_shouldextend[1])) { echo $this->runChild('layout'); } ?>

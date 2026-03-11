@@ -1,0 +1,15 @@
+====chạy ngrok để kết nối thanh toán =====
+cd D:\laragon\bin\ngrok
+.\ngrok.exe http 81
+=====
+===== email online ====
+https://mailtrap.io/
+vophuongduy.nina@gmail.com
+==========
+thong tin tài khoan
+
+Ngân hàng	NCB
+Số thẻ	9704198526191432198
+Tên chủ thẻ	NGUYEN VAN A
+Ngày phát hành	=
+Mật khẩu OTP	123456

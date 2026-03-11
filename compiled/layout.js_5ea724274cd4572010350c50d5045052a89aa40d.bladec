@@ -1,0 +1,124 @@
+<script>
+ var NN_FRAMEWORK = NN_FRAMEWORK || {};
+ var ASSET = '<?php echo \html_entity_decode(assets('assets/')??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var BASE = '<?php echo \html_entity_decode(assets()??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var CSRF_TOKEN = '<?php echo \html_entity_decode(csrf_token()??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var WEBSITE_NAME = '<?php echo \html_entity_decode(!empty($setting['name' . $lang]) ? addslashes($setting['name' . $lang]) : ''??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var RECAPTCHA_ACTIVE = <?php echo \html_entity_decode(!empty(config('app.recaptcha.active')) ? 'true' : 'false'??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var RECAPTCHA_SITEKEY = '<?php echo \html_entity_decode(config('app.recaptcha.sitekey')??'', ENT_QUOTES, 'UTF-8'); ?>';
+ var GOTOP = ASSET + 'images/top.png';
+ var CART_URL = {
+ 'ADD_CART' : '<?php echo \html_entity_decode(url('cart', ['action' => 'add-to-cart'])??'', ENT_QUOTES, 'UTF-8'); ?>',
+ 'UPDATE_CART' : '<?php echo \html_entity_decode(url('cart', ['action' => 'update-cart'])??'', ENT_QUOTES, 'UTF-8'); ?>',
+ 'DELETE_CART' : '<?php echo \html_entity_decode(url('cart', ['action' => 'delete-cart'])??'', ENT_QUOTES, 'UTF-8'); ?>',
+ 'DELETE_ALL_CART' : '<?php echo \html_entity_decode(url('cart', ['action' => 'delete-all-cart'])??'', ENT_QUOTES, 'UTF-8'); ?>',
+ 'PAGE_CART':'<?php echo \html_entity_decode(url('giohang')??'', ENT_QUOTES, 'UTF-8'); ?>',
+ };
+ var WISHLIST_URL = {
+ 'STATE': '<?php echo \html_entity_decode(url('wishlist', ['action' => 'state'])??'', ENT_QUOTES, 'UTF-8'); ?>',
+ 'TOGGLE': '<?php echo \html_entity_decode(url('wishlist', ['action' => 'toggle'])??'', ENT_QUOTES, 'UTF-8'); ?>',
+ 'MERGE': '<?php echo \html_entity_decode(url('wishlist', ['action' => 'merge'])??'', ENT_QUOTES, 'UTF-8'); ?>',
+ 'LIST': '<?php echo \html_entity_decode(url('wishlist', ['action' => 'list'])??'', ENT_QUOTES, 'UTF-8'); ?>',
+ 'REMOVE': '<?php echo \html_entity_decode(url('wishlist', ['action' => 'remove'])??'', ENT_QUOTES, 'UTF-8'); ?>',
+ 'GUEST_LIST': '<?php echo \html_entity_decode(url('wishlist', ['action' => 'guest-list'])??'', ENT_QUOTES, 'UTF-8'); ?>',
+ 'VARIANT_OPTIONS': '<?php echo \html_entity_decode(url('wishlist', ['action' => 'variant-options'])??'', ENT_QUOTES, 'UTF-8'); ?>'
+ };
+ var IS_MEMBER = <?php echo \html_entity_decode(session()->has('member') ? 'true' : 'false'??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var MEMBER_ID = <?php echo \html_entity_decode((int) (is_array(session()->get('member')) ? (session()->get('member')['member'] ?? 0) : session()->get('member', 0))??'', ENT_QUOTES, 'UTF-8'); ?>;
+ var LANG = {
+ 'no_keywords': '<?php echo \html_entity_decode(__('web.no_keywords')??'', ENT_QUOTES, 'UTF-8'); ?>',
+ 'thongbao': '<?php echo \html_entity_decode(__('web.thongbao')??'', ENT_QUOTES, 'UTF-8'); ?>',
+ 'dongy': '<?php echo \html_entity_decode(__('web.dongy')??'', ENT_QUOTES, 'UTF-8'); ?>',
+ }
+</script>
+
+<?php 
+ $toast = session()->get('toast');
+ $toastText = is_array($toast) ? trim((string) ($toast['text'] ?? '')) : '';
+ $toastStatus = is_array($toast) ? trim((string) ($toast['status'] ?? 'success')) : 'success';
+ if ($toastText !== '') {
+ session()->unset('toast');
+ }
+
+ if ($toastText === '') {
+ $queryToastText = trim((string) ($_GET['toast_text'] ?? ''));
+ $queryToastStatus = trim((string) ($_GET['toast_status'] ?? 'success'));
+ if ($queryToastText !== '') {
+ $toastText = $queryToastText;
+ $toastStatus = in_array($queryToastStatus, ['success', 'warning', 'error'], true)
+ ? $queryToastStatus
+ : 'success';
+ }
+ }
+ ?>
+<?php if($toastText !== ''): ?>
+ <script>
+ window.addEventListener('load', function () {
+ if (typeof showNotify === 'function') {
+ showNotify(<?php echo json_encode($toastText, 15, 512); ?>, 'Thông báo', <?php echo json_encode($toastStatus, 15, 512); ?>);
+ }
+ if (window.history && window.history.replaceState) {
+ try {
+ var currentUrl = new URL(window.location.href);
+ currentUrl.searchParams.delete('toast_text');
+ currentUrl.searchParams.delete('toast_status');
+ var nextUrl = currentUrl.pathname + currentUrl.search + currentUrl.hash;
+ window.history.replaceState({}, document.title, nextUrl);
+ } catch (e) {}
+ }
+ });
+ </script>
+<?php endif; ?>
+
+<?php 
+ jsminify()->set('js/jquery.min.js');
+ jsminify()->set('bootstrap/bootstrap.js');
+ jsminify()->set('holdon/HoldOn.js');
+ jsminify()->set('simplenotify/simple-notify.js');
+ jsminify()->set('fancybox5/fancybox.umd.js');
+ jsminify()->set('fotorama/fotorama.js');
+ jsminify()->set('confirm/confirm.js');
+ jsminify()->set('swiper/swiper-bundle.min.js');
+ jsminify()->set('js/functions.js');
+ jsminify()->set('js/cart.js');
+ jsminify()->set('js/wishlist.js');
+ jsminify()->set('js/apps.js');
+ echo jsminify()->get();
+ ?>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
+<?php echo $this->yieldPushContent('scripts'); ?>
+
+<?php if(!empty(config('app.recaptcha.active'))): ?> 
+ 
+ <script>
+ if (isExist($("#form-newsletter")) || isExist($("#form-contact"))) {
+ $('<script>').attr({
+ 'src': "https://www.google.com/recaptcha/api.js?render=<?php echo \html_entity_decode(config('app.recaptcha.sitekey')??'', ENT_QUOTES, 'UTF-8'); ?>",
+ 'async': ''
+ }).insertBefore($('script:first'))
+ /* Newsletter */
+ document.getElementById('form-newsletter')?.addEventListener("submit", function(event) {
+ event.preventDefault();
+ grecaptcha.ready(async function() {
+ await generateCaptcha('newsletter', 'recaptchaResponseNewsletter', 'form-newsletter');
+ });
+ }, false);
+ /* Contact */
+ document.getElementById('form-contact')?.addEventListener("submit", function(event) {
+ event.preventDefault();
+ grecaptcha.ready(async function() {
+ await generateCaptcha('contact', 'recaptchaResponseContact', 'form-contact');
+ });
+ }, false);
+ }
+ </script>
+
+<?php endif; ?>
+
+<?php if(!Func::isGoogleSpeed()): ?>
+ <script src="<?php echo (isset($this->assetDict[('assets/js/alpinejs.js')]))?$this->assetDict[('assets/js/alpinejs.js')]:$this->baseUrl.'/'.('assets/js/alpinejs.js'); ?>" defer></script>
+
+<?php endif; ?>
+<?php echo Func::decodeHtmlChars($setting['bodyjs']); ?>
+

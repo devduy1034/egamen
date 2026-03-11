@@ -1,0 +1,13 @@
+<?php $_shouldextend[2]=1; ?>
+<?php $this->startSection('contentmaster'); ?>
+ <?php echo $this->runChild('layout.seo'); ?>
+ <?php echo $this->runChild('layout.header'); ?>
+ <?php echo $this->runChild('layout.navigation'); ?>
+ <?php echo $this->includeWhen(!empty($slider), 'layout.slider'); ?>
+ <?php echo $this->includeWhen(\LARAVEL\Core\Support\Str::isNotEmpty(BreadCrumbs::get()),'layout.breadcrumbs'); ?>
+ <?php echo $this->yieldContent('content'); ?>
+ <?php echo $this->runChild('layout.footer'); ?>
+ <?php echo $this->runChild('layout.extensions'); ?>
+<?php $this->stopSection(); ?>
+
+<?php if (isset($_shouldextend[2])) { echo $this->runChild('master'); } ?>

@@ -1,0 +1,308 @@
+<?php 
+ $orderCode = (string) ($params['code'] ?? '');
+ $orderDate = (string) ($params['created_at'] ?? '');
+ $infoUser = (array) ($params['info_user'] ?? []);
+ $orderDetails = (array) ($params['order_detail'] ?? []);
+ $requirements = trim((string) ($params['requirements'] ?? ''));
+ $paymentName = Func::showName('news', (int) ($params['order_payment'] ?? 0), 'namevi');
+
+ $subtotal = max(0, (float) ($params['temp_price'] ?? 0));
+ $shipPrice = max(0, (float) ($params['ship_price'] ?? 0));
+ $totalPrice = max(0, (float) ($params['total_price'] ?? 0));
+ $voucherDiscount = max(0, $subtotal + $shipPrice - $totalPrice);
+
+ $wardName = trim((string) ($infoUser['ward_name'] ?? ($infoUser['ward'] ?? '')));
+ $cityName = trim((string) ($infoUser['city_name'] ?? ($infoUser['city'] ?? '')));
+ $addressLine = trim((string) ($infoUser['address'] ?? ''));
+ $addressFull = implode(', ', array_filter([$addressLine, $wardName, $cityName], static fn($v) => $v !== ''));
+
+ $orderLookupUrl = (string) url('order.lookup', null, ['code' => $orderCode]);
+ ?>
+
+<table align="center" bgcolor="#dcf0f8" border="0" cellpadding="0" cellspacing="0"
+ style="margin:0;padding:0;background-color:#f2f2f2;width:100%!important;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#444;line-height:18px"
+ width="100%">
+ <tbody>
+ <?php  $this->startComponent('component.email.header'); ?>
+ <?php echo $this->renderComponent(); ?>
+
+ <tr>
+ <td align="center"
+ style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#444;line-height:18px;font-weight:normal"
+ valign="top">
+ <table border="0" cellpadding="0" cellspacing="0" width="600">
+ <tbody>
+ <tr style="background:#fff">
+ <td align="left" height="auto" style="padding:15px" width="600">
+ <table width="100%">
+ <tbody>
+ <tr>
+ <td>
+ <h1
+ style="font-size:17px;font-weight:bold;color:#444;padding:0 0 5px 0;margin:0">
+ Cảm ơn quý khách đã đặt hàng tại <?php echo \html_entity_decode($optSetting['website']??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </h1>
+ <p
+ style="margin:4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#444;line-height:18px;font-weight:normal">
+ Chúng tôi rất vui thông báo đơn hàng #<?php echo \html_entity_decode($orderCode??'', ENT_QUOTES, 'UTF-8'); ?> của quý khách đã
+ được tiếp nhận và đang trong quá trình xử lý.
+ <?php echo \html_entity_decode($setting['namevi']??'', ENT_QUOTES, 'UTF-8'); ?> sẽ thông báo đến quý khách ngay khi hàng
+ chuẩn bị được giao.
+ </p>
+ <h3
+ style="font-size:13px;font-weight:bold;color:<?php echo \html_entity_decode($params['emailColor']??'', ENT_QUOTES, 'UTF-8'); ?>;text-transform:uppercase;margin:20px 0 0 0;padding:0 0 5px;border-bottom:1px solid #ddd">
+ Thông tin đơn hàng #<?php echo \html_entity_decode($orderCode??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ <span
+ style="font-size:12px;color:#777;text-transform:none;font-weight:normal">(<?php echo \html_entity_decode($orderDate??'', ENT_QUOTES, 'UTF-8'); ?>)</span>
+ </h3>
+ </td>
+ </tr>
+
+ <tr>
+ <td style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#444;line-height:18px">
+ <table border="0" cellpadding="0" cellspacing="0" width="100%">
+ <thead>
+ <tr>
+ <th align="left"
+ style="padding:6px 9px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#444;font-weight:bold"
+ width="50%">
+ Thông tin thanh toán
+ </th>
+ <th align="left"
+ style="padding:6px 0 0 9px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#444;font-weight:bold"
+ width="50%">
+ Địa chỉ giao hàng
+ </th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td style="padding:3px 9px 9px 0;border-top:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#444;line-height:18px;font-weight:normal"
+ valign="top">
+ <span
+ style="text-transform:capitalize"><?php echo \html_entity_decode($infoUser['fullname'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?></span><br>
+ <a href="mailto:<?php echo \html_entity_decode($infoUser['email'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?>"
+ target="_blank"><?php echo \html_entity_decode($infoUser['email'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?></a><br>
+ <?php echo \html_entity_decode($infoUser['phone'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </td>
+ <td style="padding:3px 0 9px 9px;border-top:0;border-left:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#444;line-height:18px;font-weight:normal"
+ valign="top">
+ <span
+ style="text-transform:capitalize"><?php echo \html_entity_decode($infoUser['fullname'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?></span><br>
+ <a href="mailto:<?php echo \html_entity_decode($infoUser['email'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?>"
+ target="_blank"><?php echo \html_entity_decode($infoUser['email'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?></a><br>
+ <?php echo \html_entity_decode($addressFull !== '' ? $addressFull : '-'??'', ENT_QUOTES, 'UTF-8'); ?><br>
+ Tel: <?php echo \html_entity_decode($infoUser['phone'] ?? ''??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </td>
+ </tr>
+
+ <tr>
+ <td colspan="2"
+ style="padding:7px 0 0 0;border-top:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#444"
+ valign="top">
+ <p
+ style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#444;line-height:18px;font-weight:normal">
+ <strong>Hình thức thanh toán:</strong>
+ <?php echo \html_entity_decode($paymentName ?: 'Chưa cập nhật'??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ <br><strong>Phí vận chuyển:</strong>
+ <?php echo \html_entity_decode($shipPrice > 0 ? Func::formatMoney($shipPrice) : 'Miễn phí'??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </p>
+ </td>
+ </tr>
+ </tbody>
+ </table>
+ </td>
+ </tr>
+
+ <?php if($requirements !== ''): ?>
+ <tr>
+ <td>
+ <p
+ style="margin:8px 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#444;line-height:18px;font-weight:normal">
+ <strong>Yêu cầu khác:</strong>
+ <?php echo nl2br(e($requirements)); ?>
+
+ </p>
+ </td>
+ </tr>
+ <?php endif; ?>
+
+ <tr>
+ <td>
+ <h2
+ style="text-align:left;margin:10px 0;border-bottom:1px solid #ddd;padding-bottom:5px;font-size:13px;color:<?php echo \html_entity_decode($params['emailColor']??'', ENT_QUOTES, 'UTF-8'); ?>">
+ CHI TIẾT ĐƠN HÀNG
+ </h2>
+
+ <table border="1" cellpadding="0" cellspacing="0" style="background:#f5f5f5"
+ width="100%">
+ <thead>
+ <tr>
+ <th align="center" bgcolor="<?php echo \html_entity_decode($params['emailColor']??'', ENT_QUOTES, 'UTF-8'); ?>"
+ style="padding:6px 9px;color:#333;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:14px">
+ Hình ảnh
+ </th>
+ <th align="left" bgcolor="<?php echo \html_entity_decode($params['emailColor']??'', ENT_QUOTES, 'UTF-8'); ?>"
+ style="padding:6px 9px;color:#333;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:14px">
+ Sản phẩm
+ </th>
+ <th align="right" bgcolor="<?php echo \html_entity_decode($params['emailColor']??'', ENT_QUOTES, 'UTF-8'); ?>"
+ style="padding:6px 9px;color:#333;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:14px">
+ Đơn giá
+ </th>
+ <th align="center" bgcolor="<?php echo \html_entity_decode($params['emailColor']??'', ENT_QUOTES, 'UTF-8'); ?>"
+ style="padding:6px 9px;color:#333;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:14px;min-width:55px;">
+ Số lượng
+ </th>
+ <th align="right" bgcolor="<?php echo \html_entity_decode($params['emailColor']??'', ENT_QUOTES, 'UTF-8'); ?>"
+ style="padding:6px 9px;color:#333;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:14px">
+ Thành tiền
+ </th>
+ </tr>
+ </thead>
+
+ <tbody bgcolor="#f7f7f7"
+ style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#444;line-height:18px">
+ <?php $__currentLoopData = $orderDetails; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $item): $loop = $this->incrementLoopIndices();  ?>
+ <?php 
+ $itemProduct = data_get($item, 'options.itemProduct', []);
+ $properties = (array) (data_get($item, 'options.properties', []) ?? []);
+ $orderPhoto = data_get($item, 'options.variantPhoto', data_get($itemProduct, 'photo', ''));
+
+ $qty = max(1, (int) data_get($item, 'qty', 1));
+ $salePrice = max(0, (float) data_get($itemProduct, 'sale_price', 0));
+ $regularPrice = max(0, (float) data_get($itemProduct, 'regular_price', 0));
+ $unitPrice = max(0, (float) data_get($item, 'price', 0));
+ if ($unitPrice <= 0) {
+ $unitPrice = $salePrice > 0 ? $salePrice : $regularPrice;
+ }
+ $lineTotal = $unitPrice * $qty;
+ ?>
+ <tr>
+ <td align="center" style="padding:6px 9px" valign="top">
+ <img style="width:90px"
+ onerror="this.src='../assets/images/noimage.png';"
+ src="<?php echo \html_entity_decode(upload('product', $orderPhoto)??'', ENT_QUOTES, 'UTF-8'); ?>"
+ alt="<?php echo \html_entity_decode(data_get($item, 'name', 'Sản phẩm')??'', ENT_QUOTES, 'UTF-8'); ?>"
+ title="<?php echo \html_entity_decode(data_get($item, 'name', 'Sản phẩm')??'', ENT_QUOTES, 'UTF-8'); ?>">
+ </td>
+
+ <td align="left" style="padding:6px 9px" valign="top">
+ <h3 style="margin:0 0 4px">
+ <?php echo \html_entity_decode(data_get($item, 'name', 'Sản phẩm')??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </h3>
+ <?php $__currentLoopData = $properties; $this->addLoop($__currentLoopData);$this->getFirstLoop();
+ foreach($__currentLoopData as $property): $loop = $this->incrementLoopIndices();  ?>
+ <?php 
+ $propertyName = '';
+ if (is_array($property)) {
+ $propertyName = (string) ($property['namevi'] ?? '');
+ } elseif (is_object($property)) {
+ $propertyName = (string) ($property->namevi ?? '');
+ }
+ $propertyName = trim($propertyName);
+ ?>
+ <?php if($propertyName !== ''): ?>
+ <p style="margin:0;color:#0f5db7"><?php echo \html_entity_decode($propertyName??'', ENT_QUOTES, 'UTF-8'); ?></p>
+ <?php endif; ?>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+ </td>
+
+ <td align="right" style="padding:6px 9px" valign="top">
+ <div>
+ <strong><?php echo \html_entity_decode(Func::formatMoney($unitPrice)??'', ENT_QUOTES, 'UTF-8'); ?></strong>
+ <?php if($salePrice > 0 && $regularPrice > $salePrice): ?>
+ <div style="color:#888;text-decoration:line-through">
+ <?php echo \html_entity_decode(Func::formatMoney($regularPrice)??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </div>
+ <?php endif; ?>
+ </div>
+ </td>
+
+ <td align="center" style="padding:6px 9px" valign="top">
+ <?php echo \html_entity_decode($qty??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </td>
+
+ <td align="right" style="padding:6px 9px" valign="top">
+ <strong><?php echo \html_entity_decode(Func::formatMoney($lineTotal)??'', ENT_QUOTES, 'UTF-8'); ?></strong>
+ </td>
+ </tr>
+ <?php endforeach; $this->popLoop(); $loop = $this->getFirstLoop(); ?>
+
+ <tr>
+ <td colspan="4" align="right" style="padding:6px 9px">
+ Tạm tính:
+ </td>
+ <td align="right" style="padding:6px 9px">
+ <?php echo \html_entity_decode(Func::formatMoney($subtotal)??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </td>
+ </tr>
+
+ <tr>
+ <td colspan="4" align="right" style="padding:6px 9px">
+ Phí vận chuyển:
+ </td>
+ <td align="right" style="padding:6px 9px">
+ <?php echo \html_entity_decode($shipPrice > 0 ? Func::formatMoney($shipPrice) : 'Miễn phí'??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </td>
+ </tr>
+
+ <?php if($voucherDiscount > 0): ?>
+ <tr>
+ <td colspan="4" align="right" style="padding:6px 9px">
+ Giảm voucher:
+ </td>
+ <td align="right" style="padding:6px 9px;color:#d0021b">
+ -<?php echo \html_entity_decode(Func::formatMoney($voucherDiscount)??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </td>
+ </tr>
+ <?php endif; ?>
+
+ <tr>
+ <td colspan="4" align="right" style="padding:6px 9px">
+ <strong>Tổng thanh toán:</strong>
+ </td>
+ <td align="right" style="padding:6px 9px">
+ <strong
+ style="color:#d0021b"><?php echo \html_entity_decode(Func::formatMoney($totalPrice)??'', ENT_QUOTES, 'UTF-8'); ?></strong>
+ </td>
+ </tr>
+ </tbody>
+ </table>
+
+ <div style="margin:auto;text-align:center">
+ <a href="<?php echo \html_entity_decode($orderLookupUrl??'', ENT_QUOTES, 'UTF-8'); ?>"
+ style="display:inline-block;text-decoration:none;background-color:<?php echo \html_entity_decode($params['emailColor']??'', ENT_QUOTES, 'UTF-8'); ?>!important;text-align:center;border-radius:3px;color:#333;padding:5px 10px;font-size:12px;font-weight:bold;margin-top:8px"
+ target="_blank">
+ Kiểm tra đơn hàng tại <?php echo \html_entity_decode($optSetting['website']??'', ENT_QUOTES, 'UTF-8'); ?>
+
+ </a>
+ </div>
+ </td>
+ </tr>
+ </tbody>
+ </table>
+ </td>
+ </tr>
+ </tbody>
+ </table>
+ </td>
+ </tr>
+
+ <?php  $this->startComponent('component.email.footer'); ?>
+ <?php echo $this->renderComponent(); ?>
+ </tbody>
+</table>
