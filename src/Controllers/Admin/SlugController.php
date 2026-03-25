@@ -13,15 +13,19 @@ class SlugController
         $admin_base = end($path_admin_array);
         if ($request->is($admin_base.'/*')) {
             $path = explode('/', $request->path());
-            $controllerName = '\LARAVEL\Controllers\Admin\\' . ucfirst(explode('-', $path[1])[0]) . 'Controller';
+            $com = $path[1] ?? '';
+            $controllerAlias = $com === 'product-crawler' ? 'ProductCrawler' : ucfirst(explode('-', $com)[0]);
+            $controllerName = '\LARAVEL\Controllers\Admin\\' . $controllerAlias . 'Controller';
             $controller = new ($controllerName);
             if ($act == 'delete' || $act == 'save'){
                 deleteOldThumbnails();;
             }
             if ($act == 'add') { $act = 'edit'; }
-            $man = (!empty($path[1])) ? explode('-', $path[1]) : '';
-            $method = $act . (!empty($man[1]) ? ucfirst($man[1]) : '');
-      
+            $man = (!empty($com)) ? explode('-', $com) : '';
+            $method = $com === 'product-crawler'
+                ? $act
+                : $act . (!empty($man[1]) ? ucfirst($man[1]) : '');
+       
             return $controller->$method($com, $act, $type, $request);
         }
     }

@@ -71,7 +71,7 @@
                                     </span>
                                 </div>
                                 <div class="price-saving-pro-detail js-price-saving {{ $hasDiscount ? '' : 'hidden' }}">
-                                    (Tiet kiem: <span>{{ Func::formatMoney($saveAmount) }}</span>)
+                                    (Tiết kiệm: <span>{{ Func::formatMoney($saveAmount) }}</span>)
                                 </div>
                             @else
                                 <div class="price-line-pro-detail">
@@ -80,7 +80,7 @@
                                     <span class="price-percent-pro-detail js-price-percent hidden"></span>
                                 </div>
                                 <div class="price-saving-pro-detail js-price-saving hidden">
-                                    (Tiet kiem: <span></span>)
+                                    (Tiết kiệm: <span></span>)
                                 </div>
                             @endif
                         </div>
