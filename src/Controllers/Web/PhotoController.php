@@ -1,14 +1,7 @@
 <?php
-/******************************************************************************
- * LARAVEL VIỆT NAM
- * Email: LARAVEL@LARAVEL.vn
- * Website: LARAVEL.vn
- * Version: 2.0
- * Đây là tài sản của CÔNG TY TNHH TM DV LARAVEL. Vui lòng không sử dụng khi chưa được phép.
- */
-
 
 namespace LARAVEL\Controllers\Web;
+
 use LARAVEL\Core\Support\Facades\View;
 use Illuminate\Http\Request;
 use LARAVEL\Controllers\Controller;
@@ -29,16 +22,16 @@ class PhotoController extends Controller
 
     public function index()
     {
-        $lang = $this -> lang;
-        $photo = PhotoModel::select('photo', 'name'.$lang,'type','link_video','id')
-        ->where('type', $this->type)
+        $lang = $this->lang;
+        $photo = PhotoModel::select('photo', 'name' . $lang, 'type', 'link_video', 'id')
+            ->where('type', $this->type)
             ->whereRaw("FIND_IN_SET(?,status)", ['hienthi'])
             ->orderBy('numb', 'asc')
             ->orderBy('id', 'desc')
             ->paginate(12);
-            $titleMain = __('web.' . config('type.photo.'.$this->type.'.website.title'));
+        $titleMain = __('web.' . config('type.photo.' . $this->type . '.website.title'));
         BreadCrumbs::setBreadcrumb(type: $this->type, title: $titleMain);
-        $this->seoPage($titleMain,$this->infoSeo('photo', $this->type, 'type','index'));
+        $this->seoPage($titleMain, $this->infoSeo('photo', $this->type, 'type', 'index'));
 
         $this->initTemplate();
 

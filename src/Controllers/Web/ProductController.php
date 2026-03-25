@@ -438,7 +438,7 @@ class ProductController extends Controller
                 $query->orderBy($column, $direction);
             }
         }
-        $product = $query->whereRaw("FIND_IN_SET(?,status)", ['hienthi'])->paginate(12);
+        $product = $query->whereRaw("FIND_IN_SET(?,status)", ['hienthi'])->paginate(20);
         return $product;
     }
 }

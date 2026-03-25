@@ -1,12 +1,5 @@
 <?php
 
-/******************************************************************************
- * LARAVEL VIỆT NAM
- * Email: LARAVEL@LARAVEL.vn
- * Website: LARAVEL.vn
- * Version: 1.0
- * Đây là tài sản của CÔNG TY TNHH TM DV LARAVEL. Vui lòng không sử dụng khi chưa được phép.
- */
 
 
 namespace LARAVEL\Controllers\Admin;

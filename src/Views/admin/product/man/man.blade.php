@@ -6,6 +6,16 @@
         </h4>
         @component('component.buttonMan')
         @endcomponent
+        @if (!empty(config('type.crawler.icondenim.active')))
+            <div class="card pd-15 bg-main mb-3 navbar-detached">
+                <div class="d-flex gap-2">
+                    <a class="btn btn-warning text-dark"
+                        href="{{ url('admin', ['com' => 'product-crawler', 'act' => 'man', 'type' => $type]) }}">
+                        <i class="ti ti-world-search mr-2"></i>Crawl ICONDENIM
+                    </a>
+                </div>
+            </div>
+        @endif
         @if (Func::chekcPermission($tb . '.import.' . $type . '.man', $permissions))
             @if (!empty($configMan->excel->import))
                 @component('component.excelImport', [

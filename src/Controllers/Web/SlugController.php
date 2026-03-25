@@ -23,12 +23,28 @@ class SlugController extends Controller
             }
             if (!empty($check) && !empty($checkDate) && !empty($check->getStatus($check['model'])->first()->id)) {
                 $method = !empty(explode('-', $check['com'])[1]) ? explode('-', $check['com'])[1] : 'detail';
-                $controller = new ($check['controller']);
+                $controllerClass = $this->resolveSlugControllerClass((string) ($check['controller'] ?? ''), (string) ($check['com'] ?? ''));
+                $controller = new ($controllerClass);
                 return $controller->$method($slug, $request);
             } else {
                 LARAVELRouter::response()->httpCode(404);
                 view('error.notfound', []);
             }
         }
+    }
+
+    protected function resolveSlugControllerClass(string $controllerClass, string $com): string
+    {
+        $controllerClass = trim($controllerClass);
+
+        if ($controllerClass !== '' && class_exists($controllerClass)) {
+            return $controllerClass;
+        }
+
+        if (in_array($com, ['product', 'product-list', 'product-cat', 'product-item', 'product-sub'], true)) {
+            return '\LARAVEL\Controllers\Web\ProductController';
+        }
+
+        return $controllerClass;
     }
 }

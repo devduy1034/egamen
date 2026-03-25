@@ -449,6 +449,34 @@ NN_FRAMEWORK.Swiper = function () {
 };
 
 NN_FRAMEWORK.Api = function () {
+	const observeNearViewport = function (element, callback, options = {}) {
+		if (!element || typeof callback !== 'function') return;
+
+		const rootMargin = options.rootMargin || '300px 0px';
+		const once = options.once !== false;
+
+		if (!('IntersectionObserver' in window)) {
+			callback(element);
+			return;
+		}
+
+		const observer = new IntersectionObserver(function (entries, currentObserver) {
+			entries.forEach(function (entry) {
+				if (!entry.isIntersecting) return;
+
+				callback(entry.target);
+
+				if (once) {
+					currentObserver.unobserve(entry.target);
+				}
+			});
+		}, {
+			rootMargin: rootMargin
+		});
+
+		observer.observe(element);
+	};
+
 	if (isExist($('.click-product'))) {
 		$('.click-product span').click(function (e) {
 			var thisClass = $(this).closest('.other-product');
@@ -491,7 +519,14 @@ NN_FRAMEWORK.Api = function () {
 			});
 		});
 		$('.click-product').each(function () {
-			$(this).find('span').first().trigger('click');
+			var triggerContainer = $(this);
+			var observeTarget = triggerContainer.closest('.list-product').get(0) || triggerContainer.get(0);
+
+			observeNearViewport(observeTarget, function () {
+				if (triggerContainer.data('lazy-loaded')) return;
+				triggerContainer.data('lazy-loaded', true);
+				triggerContainer.find('span').first().trigger('click');
+			});
 		});
 		/* loc san phẩm */
 		$('.sort-select-main span').on('click', function () {
@@ -532,40 +567,45 @@ NN_FRAMEWORK.Api = function () {
 	if (isExist($('.load-home'))) {
 		$('.load-home').each(function () {
 			var thisClass = $(this);
-			var url = thisClass.data('url');
-			var type = thisClass.data('type');
-			var paginate = thisClass.data('paginate');
-			var template = thisClass.data('template');
-			var other = thisClass.data('other');
-			var slug = thisClass.data('slug');
-			var status = thisClass.data('status');
-			var id_list = thisClass.data('list');
-			var id_cat = thisClass.data('cat');
-			var id_item = thisClass.data('item');
-			var section = thisClass.data('section');
-			var eshow = thisClass.data('eshow');
-			$.ajax({
-				url: url,
-				type: 'GET',
-				data: {
-					type: type,
-					status: status,
-					id_list: id_list,
-					id_cat: id_cat,
-					id_item: id_item,
-					template: template,
-					other: other,
-					section: section,
-					slug: slug,
-					paginate: paginate,
-					eShow: eshow
-				},
-				success: function (result) {
-					thisClass.find(eshow).html(result);
-					NN_FRAMEWORK.Swiper();
-					NN_FRAMEWORK.Img();
-					NN_FRAMEWORK.ProductCard();
-				}
+			observeNearViewport(thisClass.get(0), function () {
+				if (thisClass.data('lazy-loaded')) return;
+				thisClass.data('lazy-loaded', true);
+
+				var url = thisClass.data('url');
+				var type = thisClass.data('type');
+				var paginate = thisClass.data('paginate');
+				var template = thisClass.data('template');
+				var other = thisClass.data('other');
+				var slug = thisClass.data('slug');
+				var status = thisClass.data('status');
+				var id_list = thisClass.data('list');
+				var id_cat = thisClass.data('cat');
+				var id_item = thisClass.data('item');
+				var section = thisClass.data('section');
+				var eshow = thisClass.data('eshow');
+				$.ajax({
+					url: url,
+					type: 'GET',
+					data: {
+						type: type,
+						status: status,
+						id_list: id_list,
+						id_cat: id_cat,
+						id_item: id_item,
+						template: template,
+						other: other,
+						section: section,
+						slug: slug,
+						paginate: paginate,
+						eShow: eshow
+					},
+					success: function (result) {
+						thisClass.find(eshow).html(result);
+						NN_FRAMEWORK.Swiper();
+						NN_FRAMEWORK.Img();
+						NN_FRAMEWORK.ProductCard();
+					}
+				});
 			});
 		});
 	}

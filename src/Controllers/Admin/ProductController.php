@@ -4,6 +4,7 @@
 namespace LARAVEL\Controllers\Admin;
 
 use Carbon\Carbon;
+use DB;
 use Illuminate\Http\Request;
 use LARAVEL\Core\Support\Facades\File;
 use LARAVEL\Core\Support\Facades\Flash;
@@ -17,6 +18,7 @@ use LARAVEL\Models\ProductModel;
 use LARAVEL\Models\ProductPropertiesModel;
 use LARAVEL\Models\ProductSubModel;
 use LARAVEL\Models\ProductTagsModel;
+use LARAVEL\Models\PropertiesModel;
 use LARAVEL\Models\PropertiesListModel;
 use LARAVEL\Models\SeoModel;
 use LARAVEL\Models\SlugModel;

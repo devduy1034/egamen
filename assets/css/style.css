@@ -3136,10 +3136,107 @@ form.contact-form {
 	position: relative;
 }
 .pagination {
-	margin: 20px 0px;
+	--paging-size: 38px;
+	--paging-font-size: 15px;
+	--paging-color: #666c7a;
+	--paging-bg: #eeedf2;
+	--paging-hover-bg: #e2e4eb;
+	--paging-active-bg: linear-gradient(180deg, #90bad9 0%, #7da9ce 100%);
+	--paging-active-shadow: 0 8px 18px rgba(125, 169, 206, 0.35);
+	--paging-disabled-color: #b7bac3;
+	--paging-disabled-bg: #f2f1f5;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	margin: 1.75rem 0 0.5rem;
+	padding-left: 0;
+	list-style: none;
 }
-.pagination li span {
+.pagination li {
+	list-style: none;
+	display: flex;
+}
+.pagination .page-item + .page-item .page-link {
+	margin-left: 0;
+}
+.pagination li span,
+.pagination li a,
+.pagination .page-link {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--paging-size);
+	min-width: var(--paging-size);
+	height: var(--paging-size);
+	padding: 0 10px;
+	border-radius: 8px;
+	border: 0;
+	background-color: var(--paging-bg);
+	color: var(--paging-color);
+	font-size: var(--paging-font-size);
+	font-weight: 500;
+	line-height: 1;
+	text-align: center;
+	box-shadow: none;
+	transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 	cursor: pointer;
+	user-select: none;
+	text-decoration: none;
+}
+.pagination li:not(.active):not(.disabled) span:hover,
+.pagination li:not(.active):not(.disabled) a:hover,
+.pagination li:not(.active):not(.disabled) .page-link:hover {
+	z-index: 2;
+	color: var(--paging-color);
+	background-color: var(--paging-hover-bg);
+	transform: translateY(-1px);
+}
+.pagination li.active span,
+.pagination li.active a,
+.pagination li.active .page-link {
+	z-index: 3;
+	color: #fff;
+	background: var(--paging-active-bg);
+	box-shadow: var(--paging-active-shadow);
+}
+.pagination li.disabled span,
+.pagination li.disabled a,
+.pagination li.disabled .page-link {
+	color: var(--paging-disabled-color);
+	background-color: var(--paging-disabled-bg);
+	cursor: not-allowed;
+	pointer-events: none;
+	opacity: 1;
+}
+.pagination li.first .page-link,
+.pagination li.previous .page-link,
+.pagination li.next .page-link,
+.pagination li.last .page-link {
+	font-size: 16px;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+}
+.pagination li.disabled.first .page-link,
+.pagination li.disabled.previous .page-link,
+.pagination li.disabled.next .page-link,
+.pagination li.disabled.last .page-link {
+	color: #c7c9d1;
+}
+@media (max-width: 575px) {
+	.pagination {
+		--paging-size: 34px;
+		--paging-font-size: 14px;
+		gap: 6px;
+		margin-top: 1.25rem;
+	}
+	.pagination li span,
+	.pagination li a,
+	.pagination .page-link {
+		padding: 0 8px;
+	}
 }
 
 .btn-frame {
@@ -3920,7 +4017,9 @@ div.baonoidung ol li {
 	
 
 .wrap-product-list-home{}
-.list-product{}
+.list-product{
+    margin-bottom: 80px;
+}
 .left-product-list-home{
 	width: 19.3827160494%;
 }
