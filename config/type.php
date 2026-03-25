@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 return [
     'product' => require "type-products.php",
@@ -117,6 +117,26 @@ return [
         'admin' => false,
         'permission' => false,
         'member' => true,
+    ],
+
+    'crawler' => [
+        'icondenim' => [
+            'active' => false,
+            'enabled' => true,
+            'allow_custom_source' => true,
+            'allow_product_url' => true,
+            'allow_collection_url' => true,
+            'allow_fetch_all' => true,
+            'fetch_all_default' => true,
+            'allow_history' => true,
+            'history_show_limit' => 15,
+            'history_store_limit' => 30,
+            'default_batch_size' => 10,
+            'max_batch_size' => 50,
+            'default_variant_quantity' => 10,
+            'collection_max_pages' => 200,
+            'collection_default_url' => 'https://icondenim.com/collections/tat-ca-san-pham',
+        ],
     ],
 
     'order' => [

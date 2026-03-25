@@ -51,11 +51,15 @@ class Seo
             $this->set('url',request()->url());
             $imgJson = (!empty($seoPage['base_options'])) ? json_decode($seoPage['base_options'], true) : null;
             if (!empty($seoPage['photo']) && File::exists(upload_path_photo($path,$seoPage['photo']))) {
-                if (empty($imgJson) || ($imgJson['p'] != $seoPage['photo'])) {
+                $storedPhoto = is_array($imgJson) ? (string) ($imgJson['p'] ?? '') : '';
+                $hasImageMeta = is_array($imgJson)
+                    && isset($imgJson['w'], $imgJson['h'], $imgJson['m']);
+
+                if (empty($imgJson) || !$hasImageMeta || $storedPhoto !== (string) $seoPage['photo']) {
                     $imgJson = Func::getImgSize($seoPage['photo'],upload_path_photo($path,$seoPage['photo']));
                     $this->updateSeoDB(json_encode($imgJson), $table, $seoPage['id']);
                 }
-                if (!empty($imgJson)) {
+                if (!empty($imgJson) && isset($imgJson['w'], $imgJson['h'], $imgJson['m'])) {
                     $this->set('photo', assets_photo($path,$imgJson['w'].'x'.$imgJson['h'].'x1',$seoPage['photo'],'thumbs'));
                     $this->set('photo:width', $imgJson['w']);
                     $this->set('photo:height', $imgJson['h']);

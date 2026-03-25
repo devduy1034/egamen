@@ -150,27 +150,27 @@ return [
                 'seo_categories' => true,
             ],
         ],
-        'brand' => [
-            'title_main_brand' => "Danh mục hãng",
-            'images' => [
-                'photo' => [
-                    'title' => 'Hình đại diện',
-                    'width' => '500',
-                    'height' => '500',
-                    'opt' => '1',
-                    'thumb' => '500x500x1'
-                ]
-            ],
-            'copy_brand' => false,
-            'show_images_brand' => true,
-            'slug_brand' => true,
-            'status_brand' => ["hienthi" => "Hiển thị", "noibat" => "Nổi bật"],
-            'name_brand' => true,
-            'desc_brand' => true,
-            'desc_brand_cke' => false,
-            'content_brand' => false,
-            'content_brand_cke' => false,
-            'seo_brand' => true
-        ]
+        // 'brand' => [
+        //     'title_main_brand' => "Danh mục hãng",
+        //     'images' => [
+        //         'photo' => [
+        //             'title' => 'Hình đại diện',
+        //             'width' => '500',
+        //             'height' => '500',
+        //             'opt' => '1',
+        //             'thumb' => '500x500x1'
+        //         ]
+        //     ],
+        //     'copy_brand' => false,
+        //     'show_images_brand' => true,
+        //     'slug_brand' => true,
+        //     'status_brand' => ["hienthi" => "Hiển thị", "noibat" => "Nổi bật"],
+        //     'name_brand' => true,
+        //     'desc_brand' => true,
+        //     'desc_brand_cke' => false,
+        //     'content_brand' => false,
+        //     'content_brand_cke' => false,
+        //     'seo_brand' => true
+        // ]
     ]
 ];

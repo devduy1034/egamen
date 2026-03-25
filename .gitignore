@@ -1,5 +1,6 @@
 /compiled
 /thumbs
+/watermarks
 
 .env
 .env.development.local

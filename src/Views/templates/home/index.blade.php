@@ -282,6 +282,7 @@
                 <div class="video-home" data-aos="zoom-in" data-aos-duration="1000">
                     <div class="video-wrapper">
                         <iframe width="100%" height="100%" src="{{ Func::get_youtube($video['link'] ?? '') }}"
+                            loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
                             title="Video 1" frameborder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowfullscreen>
