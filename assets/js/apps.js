@@ -792,7 +792,7 @@ NN_FRAMEWORK.QuickView = function () {
 			wrap.className = 'quickview-detail-link-wrap';
 			wrap.innerHTML =
 				'<a class="quickview-detail-link" href="' + detailUrl + '">' +
-				'Xem chi tiet' +
+				'Xem chi tiết' +
 				'</a>';
 			rightCol.appendChild(wrap);
 		}
@@ -940,7 +940,7 @@ NN_FRAMEWORK.VoucherHome = function () {
 		input.select();
 		try {
 			document.execCommand('copy');
-		} catch (e) {}
+		} catch (e) { }
 		document.body.removeChild(input);
 	}
 

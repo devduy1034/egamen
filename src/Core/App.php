@@ -27,7 +27,12 @@ class App
     public function __construct(Container $container)
     {
         $this->container = $container;
-        Dotenv::create(RepositoryBuilder::createWithNoAdapters()->addAdapter(PutenvAdapter::class)->immutable()->make(), base_path())->load();
+        if (file_exists(base_path('.env'))) {
+            Dotenv::create(
+                RepositoryBuilder::createWithNoAdapters()->addAdapter(PutenvAdapter::class)->immutable()->make(),
+                base_path()
+            )->safeLoad();
+        }
         $this->registerConfigProvider();
         new AliasLoader();
     }

@@ -8,11 +8,13 @@
                         <div class="policies-item">
                             <div class="policies-image">
                                 @component('component.image', [
-                                    'rel' => 'preload',
                                     'class' => 'w-100',
                                     'w' => config('type.photo.' . $v['type'] . '.images.photo.width'),
                                     'h' => config('type.photo.' . $v['type'] . '.images.photo.height'),
                                     'z' => 0,
+                                    'loading' => 'lazy',
+                                    'fetchpriority' => 'low',
+                                    'decoding' => 'async',
                                     'type' => '',
                                     'destination' => 'photo',
                                     'image' => $v['photo'] ?? '',
@@ -89,7 +91,9 @@
                         <div class="col-12 col-sm-6 col-xl-3">
                             <article class="voucher-home-card h-100">
                                 <div class="voucher-home-thumb">
-                                    <img src="{{ $voucherImage }}" alt="{{ $voucher['code'] ?? '' }}">
+                                    <img src="{{ $voucherImage }}" alt="{{ $voucher['code'] ?? '' }}"
+                                        loading="lazy" fetchpriority="low" decoding="async" width="70"
+                                        height="115">
                                 </div>
                                 <div class="voucher-home-info">
                                     <h3 class="voucher-home-code">NHẬP MÃ: {{ $voucher['code'] ?? '' }}</h3>
@@ -168,11 +172,13 @@
                                     <div class="pic-procat">
                                         <a class="" href="{{ $v[$sluglang] }}" title="{{ $v['name' . $lang] }}">
                                             @component('component.image', [
-                                                'rel' => 'preload',
                                                 'class' => 'w-100',
                                                 'w' => config('type.product.' . $v['type'] . '.categories.cat.images.photo.width'),
                                                 'h' => config('type.product.' . $v['type'] . '.categories.cat.images.photo.height'),
                                                 'z' => config('type.product.' . $v['type'] . '.categories.cat.images.photo.opt'),
+                                                'loading' => 'lazy',
+                                                'fetchpriority' => 'low',
+                                                'decoding' => 'async',
                                                 'is_watermarks' => false,
                                                 'destination' => 'product',
                                                 'image' => $v['photo'] ?? '',
@@ -230,6 +236,9 @@
                                             'w' => config('type.photo.' . $v['type'] . '.width'),
                                             'h' => config('type.photo.' . $v['type'] . '.height'),
                                             'z' => config('type.photo.' . $v['type'] . '.opt'),
+                                            'loading' => 'lazy',
+                                            'fetchpriority' => 'low',
+                                            'decoding' => 'async',
                                             'is_watermarks' => false,
                                             'destination' => 'photo',
                                             'image' => $v['photo'] ?? '',

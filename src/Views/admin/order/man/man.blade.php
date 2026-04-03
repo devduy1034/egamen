@@ -589,6 +589,9 @@
         var dashboardRange = document.getElementById('dashboard-range');
         var dashboardDateWrap = document.getElementById('dashboard-date-wrap');
         var dashboardDateInput = document.getElementById('dashboard-date-range');
+        var dashboardFilterRange = @json($dashboardFilters['range'] ?? '30d');
+        var dashboardFilterMonth = @json($dashboardFilters['dashboard_month'] ?? date('Y-m'));
+        var dashboardFilterYear = @json($dashboardFilters['dashboard_year'] ?? date('Y'));
         var dashboardReturnQuery = document.getElementById('dashboard-return-query');
         var dashboardCharts = @json($dashboardData['charts'] ?? []);
         var dashboardDrilldownEnabled = {{ $dashboardDrilldownEnabled ? 'true' : 'false' }};
@@ -624,13 +627,79 @@
             dashboardReturnQuery.value = (window.location.search || '').replace(/^\?/, '');
         }
 
+        function ensureDashboardRangeOption(value, label) {
+            if (!dashboardRange) return;
+            if (dashboardRange.querySelector('option[value="' + value + '"]')) return;
+            var option = document.createElement('option');
+            option.value = value;
+            option.textContent = label;
+            dashboardRange.appendChild(option);
+        }
+
+        function buildDashboardExtraInput(id, name, label, type, value) {
+            if (!dashboardDateWrap || !dashboardDateWrap.parentNode) return null;
+            var wrap = document.getElementById(id + '-wrap');
+            if (wrap) return wrap;
+
+            wrap = document.createElement('div');
+            wrap.className = 'col-md-2 d-none';
+            wrap.id = id + '-wrap';
+
+            var labelEl = document.createElement('label');
+            labelEl.className = 'form-label mb-1';
+            labelEl.setAttribute('for', id);
+            labelEl.textContent = label;
+
+            var input = document.createElement('input');
+            input.type = type;
+            input.className = 'form-control form-control-sm';
+            input.id = id;
+            input.name = name;
+            input.value = value || '';
+
+            if (type === 'number') {
+                input.min = '2000';
+                input.max = String(new Date().getFullYear() + 5);
+                input.step = '1';
+            }
+
+            wrap.appendChild(labelEl);
+            wrap.appendChild(input);
+            dashboardDateWrap.insertAdjacentElement('afterend', wrap);
+            return wrap;
+        }
+
+        ensureDashboardRangeOption('month', 'Theo tháng');
+        ensureDashboardRangeOption('year', 'Theo năm');
+
+        if (dashboardRange && dashboardFilterRange) {
+            dashboardRange.value = dashboardFilterRange;
+        }
+
+        var dashboardMonthWrap = buildDashboardExtraInput(
+            'dashboard-month',
+            'dashboard_month',
+            'Tháng',
+            'month',
+            dashboardFilterMonth
+        );
+        var dashboardYearWrap = buildDashboardExtraInput(
+            'dashboard-year',
+            'dashboard_year',
+            'Năm',
+            'number',
+            dashboardFilterYear
+        );
+
         function toggleDashboardDateRange() {
             if (!dashboardDateWrap || !dashboardRange) return;
-            if (dashboardRange.value === 'custom') {
-                dashboardDateWrap.classList.remove('d-none');
-            } else {
-                dashboardDateWrap.classList.add('d-none');
-            }
+            var isCustom = dashboardRange.value === 'custom';
+            var isMonth = dashboardRange.value === 'month';
+            var isYear = dashboardRange.value === 'year';
+
+            dashboardDateWrap.classList.toggle('d-none', !isCustom);
+            if (dashboardMonthWrap) dashboardMonthWrap.classList.toggle('d-none', !isMonth);
+            if (dashboardYearWrap) dashboardYearWrap.classList.toggle('d-none', !isYear);
         }
 
         if (dashboardRange) {

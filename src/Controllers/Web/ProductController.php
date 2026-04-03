@@ -33,6 +33,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $product = $this->productItem('', $request, $this->type);
+        $listProperties = $this->searchListProperties();
         $titleMain =  $this->infoSeo('product', $this->type, 'title');
         $titleMain = __('web.' . $titleMain);
         BreadCrumbs::setBreadcrumb(type: $this->type, title: $titleMain);
@@ -40,7 +41,21 @@ class ProductController extends Controller
 
         $this->initTemplate();
 
-        return View::share(['com' => $this->type])->view(implode('.', $this->template), compact('product', 'titleMain'));
+        return View::share(['com' => $this->type])->view(implode('.', $this->template), compact('product', 'titleMain', 'listProperties'));
+    }
+
+    public function newProduct(Request $request)
+    {
+        $this->type = 'san-pham';
+        $product = $this->productItem('', $request, $this->type, 'moi');
+        $listProperties = $this->searchListProperties();
+        $titleMain = "Sản phẩm mới";
+        BreadCrumbs::setBreadcrumb(type: $this->type, title: $titleMain);
+        $this->seoPage($titleMain, $this->infoSeo('product', $this->type, 'type', 'index'));
+
+        $this->initTemplate();
+
+        return View::share(['com' => $this->type])->view(implode('.', $this->template), compact('product', 'titleMain', 'listProperties'));
     }
 
     public function allBrand(Request $request)
@@ -64,6 +79,7 @@ class ProductController extends Controller
             })
             ->whereRaw("FIND_IN_SET(?,status)", ['hienthi'])
             ->first();
+        $listProperties = $this->searchListProperties();
         $this->type =  $itemBrand->type;
         $titleMain = $itemBrand['name' . $this->lang];
         BreadCrumbs::setBreadcrumb(list: $itemBrand);
@@ -74,7 +90,7 @@ class ProductController extends Controller
 
         $this->initTemplate($itemBrand['type']);
 
-        return View::share(['idList' => $itemBrand['id'], 'com' => $this->type])->view(implode('.', $this->template), compact('product', 'titleMain'));
+        return View::share(['idList' => $itemBrand['id'], 'com' => $this->type])->view(implode('.', $this->template), compact('product', 'titleMain', 'listProperties'));
     }
 
     public function list($slug, Request $request)
@@ -156,6 +172,7 @@ class ProductController extends Controller
             })
             ->whereRaw("FIND_IN_SET(?,status)", ['hienthi'])
             ->first();
+        $listProperties =  $this->searchListProperties($itemSub['id_list'] ?? null);
         $this->type =  $itemSub->type;
         $titleMain = $itemSub['name' . $this->lang];
         $itemList = $itemSub->getCategoryList;
@@ -170,7 +187,7 @@ class ProductController extends Controller
 
         $this->initTemplate($itemSub['type']);
 
-        return View::share(['com' => $this->type])->view(implode('.', $this->template), compact('product', 'titleMain'));
+        return View::share(['com' => $this->type])->view(implode('.', $this->template), compact('product', 'titleMain', 'listProperties'));
     }
     public function detail($slug)
     {
@@ -358,17 +375,128 @@ class ProductController extends Controller
         return $properties;
     }
 
-    private function  searchListProperties($idl)
+    private function normalizeQueryValues(mixed $value): array
+    {
+        if (is_array($value)) {
+            $values = $value;
+        } else {
+            $values = explode(',', (string) $value);
+        }
+
+        return array_values(array_filter(array_map(static function ($item) {
+            return trim((string) $item);
+        }, $values), static function ($item) {
+            return $item !== '';
+        }));
+    }
+
+    private function  searchListProperties($idl = null)
     {
         $querySearch = PropertiesListModel::select('type', 'id', 'name' . $this->lang, 'slug' . $this->lang,)
             ->where('type', 'san-pham')
-            ->whereRaw("FIND_IN_SET(?,id_list)", [$idl])
             ->whereRaw("FIND_IN_SET(?,status)", ['search']);
-        return $querySearch->orderBy('numb', 'asc')->get()->map(fn($v) => [$v, $v->getProperties()->get()]);
+
+        if (!empty($idl)) {
+            $querySearch->whereRaw("FIND_IN_SET(?,id_list)", [$idl]);
+        }
+
+        return $querySearch->orderBy('numb', 'asc')->get()->map(fn($v) => [
+            $v,
+            $v->getProperties()->orderBy('numb', 'asc')->orderBy('id', 'asc')->get()
+        ]);
     }
 
-    private function productItem($array = null, $request = null, $slug = '')
+    private function productItem($array = null, $request = null, $slug = '', $additionalStatus = null)
     {
+        if (!empty($array)) {
+            $query = $array->getItems([
+                'id',
+                'name' . $this->lang,
+                'desc' . $this->lang,
+                'slug' . $this->lang,
+                'photo',
+                'icon',
+                'regular_price',
+                'sale_price',
+                'discount',
+                'type',
+                'properties'
+            ])->with(['getPhotos' => function ($query) {
+                $query->where('type', 'san-pham')->orderBy('numb', 'asc');
+            }])->whereRaw("FIND_IN_SET(?,status)", ['hienthi']);
+        } else {
+            $query = ProductModel::select('id', 'name' . $this->lang, 'photo', 'icon', 'desc' . $this->lang, 'slug' . $this->lang, 'status', 'numb', 'sale_price', 'regular_price', 'type', 'discount', 'properties')
+                ->with(['getPhotos' => function ($query) {
+                    $query->where('type', 'san-pham')->orderBy('numb', 'asc');
+                }])
+                ->where('type', $slug)->whereRaw("FIND_IN_SET(?,status)", ['hienthi']);
+        }
+
+        $filters = $request?->query() ?? [];
+        unset($filters['zarsrc'], $filters['utm_source'], $filters['utm_medium'], $filters['utm_campaign'], $filters['page']);
+
+        $sort = (string) ($filters['sort'] ?? '1');
+        unset($filters['sort']);
+
+        $priceRanges = $this->normalizeQueryValues($filters['price'] ?? []);
+        unset($filters['price']);
+
+        foreach ($filters as $propertyGroup) {
+            $items = array_map('intval', $this->normalizeQueryValues($propertyGroup));
+            if (empty($items)) {
+                continue;
+            }
+
+            $query->where(function ($subQuery) use ($items) {
+                foreach ($items as $item) {
+                    $subQuery->orWhereRaw('FIND_IN_SET(?, properties)', [$item]);
+                }
+            });
+        }
+
+        $effectivePriceSql = 'CASE WHEN sale_price > 0 THEN sale_price ELSE regular_price END';
+
+        if (!empty($priceRanges)) {
+            $query->where(function ($priceQuery) use ($priceRanges, $effectivePriceSql) {
+                foreach ($priceRanges as $range) {
+                    switch ($range) {
+                        case 'under-300k':
+                            $priceQuery->orWhereRaw($effectivePriceSql . ' > 0 AND ' . $effectivePriceSql . ' < ?', [300000]);
+                            break;
+                        case '300k-500k':
+                            $priceQuery->orWhereRaw($effectivePriceSql . ' BETWEEN ? AND ?', [300000, 500000]);
+                            break;
+                        case '500k-700k':
+                            $priceQuery->orWhereRaw($effectivePriceSql . ' BETWEEN ? AND ?', [500000, 700000]);
+                            break;
+                        case '700k-1000k':
+                            $priceQuery->orWhereRaw($effectivePriceSql . ' BETWEEN ? AND ?', [700000, 1000000]);
+                            break;
+                        case 'over-1000k':
+                            $priceQuery->orWhereRaw($effectivePriceSql . ' > ?', [1000000]);
+                            break;
+                    }
+                }
+            });
+        }
+
+        if ($sort === '3') {
+            $query->orderByRaw($effectivePriceSql . ' desc');
+        } elseif ($sort === '4') {
+            $query->orderByRaw($effectivePriceSql . ' asc');
+        } elseif ($sort === '2') {
+            $query->orderBy('numb', 'asc');
+            $query->orderBy('id', 'asc');
+        } else {
+            $query->orderBy('numb', 'asc');
+            $query->orderBy('id', 'desc');
+        }
+
+        if ($additionalStatus) {
+            $query->whereRaw("FIND_IN_SET(?,status)", [$additionalStatus]);
+        }
+
+        return $query->whereRaw("FIND_IN_SET(?,status)", ['hienthi'])->paginate(20);
         // Mặc định sắp xếp
         $defaultOrderBy = ['numb' => 'asc', 'id' => 'desc'];
         $propaties = $request->getQueryString() ?? '';

@@ -26,6 +26,7 @@ LARAVELRouter::group(['namespace' => 'Web','prefix' => config('app.web_prefix'),
     LARAVELRouter::get('/load-video', 'ApiController@video')->name('load-video');
 
     LARAVELRouter::get('/load-product', 'HomeController@ajaxProduct')->name('load-product');
+    LARAVELRouter::get('/san-pham-moi', 'ProductController@newProduct')->name('new-product');
     LARAVELRouter::get('/tags-san-pham', 'TagsController@index')->name('tags');
     LARAVELRouter::get('/hang', 'ProductController@allBrand')->name('hang');
 

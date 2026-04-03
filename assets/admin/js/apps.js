@@ -242,25 +242,12 @@ function cardProperties() {
 					$codeInputs = $rows.find("input[name^='propertiescard[code]']");
 				}
 
-				if (mainRegular) {
-					$regularInputs.each(function () {
-						var $input = $(this);
-						if (!$input.val() || $input.val() === '0') $input.val(mainRegular);
-					});
-				}
+				updatePropertiesPrices($rows, mainRegular, mainSale);
 
-				if (mainSale) {
-					$saleInputs.each(function () {
-						var $input = $(this);
-						if (!$input.val() || $input.val() === '0') $input.val(mainSale);
-					});
+				if (mainCode) {
+					updatePropertiesCodes($rows, mainCode);
+					$('#code').data('codeBase', mainCode);
 				}
-
-			if (mainCode) {
-				var oldBase = $('#code').data('codeBase') || mainCode;
-				updatePropertiesCodes($rows, mainCode, oldBase);
-				$('#code').data('codeBase', mainCode);
-			}
 
 				$rows.each(function () {
 					updatePropertiesDiscount($(this));
@@ -329,7 +316,7 @@ function applyPropertiesCache($group, cache) {
 	ensurePropertiesNumberSequence();
 }
 
-function updatePropertiesCodes($rows, mainCode, oldBase) {
+function updatePropertiesCodes($rows, mainCode) {
 	if (!$rows || !$rows.length || !mainCode) return;
 	$rows.each(function (index) {
 		var $wrap = $(this);
@@ -337,16 +324,29 @@ function updatePropertiesCodes($rows, mainCode, oldBase) {
 		if (!$input.length) $input = $wrap.find("input[name^='propertiescard[code]']");
 		if (!$input.length) return;
 
-		var current = ($input.val() || '').toString().trim();
-		var shouldUpdate = !current;
-		if (!shouldUpdate && oldBase) {
-			var prefix = oldBase + '-';
-			shouldUpdate = current.indexOf(prefix) === 0;
+		var num = String(index + 1).padStart(2, '0');
+		$input.val(mainCode + '-' + num);
+	});
+}
+
+function updatePropertiesPrices($rows, mainRegular, mainSale) {
+	if (!$rows || !$rows.length) return;
+	$rows.each(function () {
+		var $wrap = $(this);
+		var $regular = $wrap.find('.regular_price');
+		var $sale = $wrap.find('.sale_price');
+
+		if (!$regular.length) $regular = $wrap.find("input[name^='propertiescard[regular_price]']");
+		if (!$sale.length) $sale = $wrap.find("input[name^='propertiescard[sale_price]']");
+
+		if (typeof mainRegular !== 'undefined' && mainRegular !== null && mainRegular !== '') {
+			$regular.val(mainRegular);
 		}
-		if (shouldUpdate) {
-			var num = String(index + 1).padStart(2, '0');
-			$input.val(mainCode + '-' + num);
+		if (typeof mainSale !== 'undefined' && mainSale !== null && mainSale !== '') {
+			$sale.val(mainSale);
 		}
+
+		updatePropertiesDiscount($wrap);
 	});
 }
 
@@ -999,13 +999,29 @@ $(document).ready(function () {
 			var mainCode = $code.val();
 			if (!mainCode) return;
 			var $rows = $('.group-properties .flex-propertiescard');
-			var oldBase = $code.data('codeBase') || mainCode;
-			updatePropertiesCodes($rows, mainCode, oldBase);
+			updatePropertiesCodes($rows, mainCode);
 			$code.data('codeBase', mainCode);
+		});
+
+		$(document).on('input keyup change', '#regular_price, #sale_price', function () {
+			var $rows = $('.group-properties .flex-propertiescard');
+			updatePropertiesPrices($rows, $('#regular_price').val(), $('#sale_price').val());
 		});
 	}
 
 	if ($('.group-properties').length) {
+		updatePropertiesPrices(
+			$('.group-properties .flex-propertiescard'),
+			($('#regular_price').val() || '').toString().trim(),
+			($('#sale_price').val() || '').toString().trim()
+		);
+
+		var mainCode = ($('#code').val() || '').toString().trim();
+		if (mainCode) {
+			updatePropertiesCodes($('.group-properties .flex-propertiescard'), mainCode);
+			$('#code').data('codeBase', mainCode);
+		}
+
 		initPropertiesPhotoSelect($('.group-properties'));
 		$('.group-properties .properties_id_photo').each(function () {
 			updatePropertiesPhotoPreview($(this));

@@ -10,6 +10,13 @@ use Illuminate\Support\Str;
 
 class InterventionController extends Controller
 {
+    protected function webpQuality(): int
+    {
+        $quality = (int) config('app.image_webp_quality', 82);
+
+        return max(60, min(100, $quality));
+    }
+
     public function thumb($thumbsize, $path, $folder, $imageUrl)
     {
         $imageUrl = Str::beforeLast($imageUrl, '.webp');
@@ -24,7 +31,7 @@ class InterventionController extends Controller
         try {
             if (!File::exists($thumbFile)) {
                 $image = $this->getRead($thumb_path, $folder, $imageUrl, $width, $height, $zoom_crop, $path);
-                $generatedBinary = (string) $image->toWebp(100);
+                $generatedBinary = (string) $image->toWebp($this->webpQuality());
                 File::put($thumbFile, $generatedBinary);
             }
         } finally {
@@ -67,7 +74,7 @@ class InterventionController extends Controller
                     );
                 }
                 clock()->event('Read toWebp')->color('grey')->begin();
-                $image = $image->toWebp(100);
+                $image = $image->toWebp($this->webpQuality());
                 clock()->event('Read toWebp')->end();
                 clock()->event('save toWebp')->color('grey')->begin();
                 $generatedBinary = (string) $image;
@@ -149,7 +156,7 @@ class InterventionController extends Controller
 
         if (!headers_sent()) {
             header('Content-Type: image/webp');
-            header('Cache-Control: public, max-age=31536000');
+            header('Cache-Control: public, max-age=31536000, immutable');
             header('Content-Length: ' . strlen($binary));
         }
         echo $binary;
