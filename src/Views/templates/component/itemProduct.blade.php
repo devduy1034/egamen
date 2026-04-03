@@ -53,6 +53,9 @@
                 'w' => $photoW,
                 'h' => $photoH,
                 'z' => $photoZ,
+                'loading' => 'lazy',
+                'fetchpriority' => 'low',
+                'decoding' => 'async',
                 'is_watermarks' => true,
                 'destination' => 'product',
                 'image' => $mainPhoto,
@@ -65,6 +68,9 @@
                     'w' => config('type.product.' . $product['type'] . '.images.icon.width'),
                     'h' => config('type.product.' . $product['type'] . '.images.icon.height'),
                     'z' => config('type.product.' . $product['type'] . '.images.icon.opt'),
+                    'loading' => 'lazy',
+                    'fetchpriority' => 'low',
+                    'decoding' => 'async',
                     'is_watermarks' => true,
                     'destination' => 'product',
                     'image' => $hoverPhoto ?? '',
@@ -95,7 +101,7 @@
         <div class="price-product">
             @if (empty($product['sale_price']))
                 @if (empty($product['regular_price']))
-                    <span class="price-new">Lien he</span>
+                    <span class="price-new">Liên hệ</span>
                 @else
                     <span class="price-new">{{ Func::formatMoney($product['regular_price']) }}</span>
                 @endif

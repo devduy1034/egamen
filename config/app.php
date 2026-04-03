@@ -44,6 +44,7 @@ return [
     'cache_pages_time' => env('CACHE_HTML_TIME', 10),
     'cache_css' => env('CACHE_CSS', false),
     'cache_js' => env('CACHE_JS', false),
+    'image_webp_quality' => (int) env('IMAGE_WEBP_QUALITY', 82),
     'nocache' => [],
     'web_prefix' => substr(env('SITE_PATH'), 0, -1) . ((env('LANG_CONFIG') == 'link') ? '/{language}' : ''),
     'admin_prefix' => (env('SITE_PATH') . 'admin'),

@@ -99,7 +99,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="transition {{ ($com ?? '') == 'san-pham-moi' ? 'active' : '' }} "
-                                        href="{{ url('san-pham-moi') }}"
+                                        href="{{ url('new-product') }}"
                                         title="{{ $setting['name' . $lang] . '-' . __('web.sanphammoi') }}">{{ __('web.sanphammoi') }}
                                         <span class="menu-new">New</span>
                                     </a>

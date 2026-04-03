@@ -193,7 +193,7 @@ class OrderController
             $tab = 'list';
         }
 
-        $allowedRanges = ['today', '7d', '30d', 'custom'];
+        $allowedRanges = ['today', '7d', '30d', 'month', 'year', 'custom'];
         $range = trim((string) $request->query('dashboard_range', '30d'));
         if (!in_array($range, $allowedRanges, true)) {
             $range = '30d';
@@ -203,6 +203,8 @@ class OrderController
         $from = $now->copy()->subDays(29)->startOfDay();
         $to = $now->copy()->endOfDay();
         $dashboardDateRaw = trim((string) $request->query('dashboard_date', ''));
+        $dashboardMonthRaw = trim((string) $request->query('dashboard_month', $now->format('Y-m')));
+        $dashboardYearRaw = trim((string) $request->query('dashboard_year', (string) $now->year));
 
         if ($range === 'today') {
             $from = $now->copy()->startOfDay();
@@ -210,6 +212,23 @@ class OrderController
         } elseif ($range === '7d') {
             $from = $now->copy()->subDays(6)->startOfDay();
             $to = $now->copy()->endOfDay();
+        } elseif ($range === 'month') {
+            try {
+                $monthDate = Carbon::createFromFormat('Y-m', $dashboardMonthRaw)->startOfMonth();
+            } catch (\Throwable $e) {
+                $monthDate = $now->copy()->startOfMonth();
+                $dashboardMonthRaw = $monthDate->format('Y-m');
+            }
+            $from = $monthDate->copy()->startOfMonth();
+            $to = $monthDate->copy()->endOfMonth();
+        } elseif ($range === 'year') {
+            $dashboardYear = (int) $dashboardYearRaw;
+            if ($dashboardYear < 2000 || $dashboardYear > ((int) $now->year + 5)) {
+                $dashboardYear = (int) $now->year;
+            }
+            $dashboardYearRaw = (string) $dashboardYear;
+            $from = Carbon::create($dashboardYear, 1, 1, 0, 0, 0)->startOfDay();
+            $to = Carbon::create($dashboardYear, 12, 31, 23, 59, 59)->endOfDay();
         } elseif ($range === 'custom') {
             $parsedRange = $this->resolveDashboardDateRangeFromRaw($dashboardDateRaw);
             if (!empty($parsedRange)) {
@@ -232,6 +251,8 @@ class OrderController
             'status' => $status,
             'channel' => $channel,
             'dashboard_date' => $dashboardDateRaw,
+            'dashboard_month' => $dashboardMonthRaw,
+            'dashboard_year' => $dashboardYearRaw,
             'from' => $from,
             'to' => $to,
             'range_days' => max(1, (int) $from->diffInDays($to) + 1),
@@ -239,6 +260,8 @@ class OrderController
             'range_label' => match ($range) {
                 'today' => 'Hôm nay',
                 '7d' => '7 ngày gần nhất',
+                'month' => 'Tháng ' . $from->format('m/Y'),
+                'year' => 'Năm ' . $from->format('Y'),
                 'custom' => 'Tùy chọn',
                 default => '30 ngày gần nhất',
             },
@@ -415,25 +438,54 @@ class OrderController
         $from = $filters['from']->copy();
         $to = $filters['to']->copy();
 
-        $dailyRows = $this->buildDashboardBaseQuery($filters)
-            ->selectRaw('DATE(created_at) AS day_key, COUNT(*) AS total_orders, COALESCE(SUM(total_price), 0) AS total_revenue')
-            ->groupBy('day_key')
-            ->orderBy('day_key', 'asc')
-            ->get()
-            ->keyBy('day_key');
-
         $labels = [];
         $dateKeys = [];
         $revenueSeries = [];
         $orderSeries = [];
-        $cursor = $from->copy();
-        while ($cursor->lte($to)) {
-            $dateKey = $cursor->format('Y-m-d');
-            $labels[] = $cursor->format('d/m');
-            $dateKeys[] = $cursor->format('d/m/Y');
-            $revenueSeries[] = (float) ($dailyRows[$dateKey]->total_revenue ?? 0);
-            $orderSeries[] = (int) ($dailyRows[$dateKey]->total_orders ?? 0);
-            $cursor->addDay();
+        $lineGranularity = ((string) ($filters['range'] ?? '') === 'year' || (int) ($filters['range_days'] ?? 0) > 90) ? 'month' : 'day';
+        if ($lineGranularity === 'month') {
+            $monthlyRows = $this->buildDashboardBaseQuery($filters)
+                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') AS month_key, COUNT(*) AS total_orders, COALESCE(SUM(total_price), 0) AS total_revenue")
+                ->groupBy('month_key')
+                ->orderBy('month_key', 'asc')
+                ->get()
+                ->keyBy('month_key');
+
+            $cursor = $from->copy()->startOfMonth();
+            while ($cursor->lte($to)) {
+                $monthKey = $cursor->format('Y-m');
+                $rangeFrom = $cursor->copy()->startOfMonth();
+                $rangeTo = $cursor->copy()->endOfMonth();
+                if ($rangeFrom->lt($from)) {
+                    $rangeFrom = $from->copy();
+                }
+                if ($rangeTo->gt($to)) {
+                    $rangeTo = $to->copy();
+                }
+
+                $labels[] = $cursor->format('m/Y');
+                $dateKeys[] = $rangeFrom->format('d/m/Y') . ' to ' . $rangeTo->format('d/m/Y');
+                $revenueSeries[] = (float) ($monthlyRows[$monthKey]->total_revenue ?? 0);
+                $orderSeries[] = (int) ($monthlyRows[$monthKey]->total_orders ?? 0);
+                $cursor->addMonthNoOverflow()->startOfMonth();
+            }
+        } else {
+            $dailyRows = $this->buildDashboardBaseQuery($filters)
+                ->selectRaw('DATE(created_at) AS day_key, COUNT(*) AS total_orders, COALESCE(SUM(total_price), 0) AS total_revenue')
+                ->groupBy('day_key')
+                ->orderBy('day_key', 'asc')
+                ->get()
+                ->keyBy('day_key');
+
+            $cursor = $from->copy();
+            while ($cursor->lte($to)) {
+                $dateKey = $cursor->format('Y-m-d');
+                $labels[] = $cursor->format('d/m');
+                $dateKeys[] = $cursor->format('d/m/Y');
+                $revenueSeries[] = (float) ($dailyRows[$dateKey]->total_revenue ?? 0);
+                $orderSeries[] = (int) ($dailyRows[$dateKey]->total_orders ?? 0);
+                $cursor->addDay();
+            }
         }
 
         $statusCounts = $this->buildDashboardBaseQuery($filters)
@@ -481,6 +533,7 @@ class OrderController
 
         return [
             'line' => [
+                'granularity' => $lineGranularity,
                 'labels' => $labels,
                 'date_keys' => $dateKeys,
                 'revenue_series' => $revenueSeries,
