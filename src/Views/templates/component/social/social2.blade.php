@@ -19,6 +19,7 @@
     $location = !empty($left) ? 'left' : 'right';
     $destop = !empty($val['destop']['device']) && device() == 'destop' ? true : false;
     $mobile = !empty($val['mobile']['device']) && device() == 'mobile' ? true : false;
+    $socialThumb = config('type.extensions.social.thumb') ?? '35x35x1';
 @endphp
 
 @if (!empty($destop) || !empty($mobile))
@@ -32,10 +33,16 @@
     ">
         <ul>
             @foreach ($mxh as $mxh)
+                @php
+                    $socialSrc = !empty($mxh['photo'])
+                        ? assets_photo('photo', $socialThumb, $mxh['photo'], 'thumbs')
+                        : assets('assets/images/noimage.png');
+                @endphp
                 <li>
                     <a class=" text-decoration-none " href="{{ $mxh['link'] }}" title="{{ $mxh['namevi'] }}">
-                        <img data-src="{{ upload('photo', $mxh['photo']) }}" alt="{{ $mxh['namevi'] }}" class="lazy loaded"
-                            src="{{ upload('photo', $mxh['photo']) }}" data-was-processed="true"><br>
+                        <img data-src="{{ $socialSrc }}" alt="{{ $mxh['namevi'] }}" class="lazy loaded"
+                            src="{{ $socialSrc }}"
+                            data-was-processed="true" loading="lazy" decoding="async"><br>
                         <span>{{ $mxh['namevi'] }}</span>
                     </a>
                 </li>

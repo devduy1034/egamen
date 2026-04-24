@@ -56,10 +56,11 @@
                                 $rawRegular = (float) ($rowDetail['regular_price'] ?? 0);
                                 $rawSale = (float) ($rowDetail['sale_price'] ?? 0);
                                 $hasDiscount = $rawSale > 0 && $rawRegular > $rawSale;
+                                $displayPrice = $rawSale > 0 ? $rawSale : $rawRegular;
                                 $saveAmount = $hasDiscount ? $rawRegular - $rawSale : 0;
                                 $savePercent = $hasDiscount ? round((($rawRegular - $rawSale) * 100) / $rawRegular) : 0;
                             @endphp
-                            @if ($rowDetail['sale_price'])
+                            @if ($hasDiscount)
                                 <div class="price-line-pro-detail">
                                     <span
                                         class="price-new-pro-detail">{{ Func::formatMoney($rowDetail['sale_price']) }}</span>
@@ -76,7 +77,8 @@
                             @else
                                 <div class="price-line-pro-detail">
                                     <span
-                                        class="price-new-pro-detail">{{ $rowDetail['regular_price'] ? Func::formatMoney($rowDetail['regular_price']) : __('web.lienhe') }}</span>
+                                        class="price-new-pro-detail">{{ $displayPrice ? Func::formatMoney($displayPrice) : __('web.lienhe') }}</span>
+                                    <span class="price-old-pro-detail"></span>
                                     <span class="price-percent-pro-detail js-price-percent hidden"></span>
                                 </div>
                                 <div class="price-saving-pro-detail js-price-saving hidden">
@@ -85,6 +87,25 @@
                             @endif
                         </div>
                     </li>
+                    @if (config('type.comment'))
+                        <div class="product-review-summary">
+                            <div class="comment-star">
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <span style="width: {{ Comment::avgStar($rowDetail['id'], $rowDetail['type']) }}%">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </span>
+                            </div>
+                            <div class="comment-count"><a>({{ $countComment }} đánh giá)</a></div>
+                        </div>
+                    @endif
                     @if (!empty($rowDetail['desc' . $lang]))
                         <div class="desc-pro-detail mb-4">
                             {!! Func::decodeHtmlChars($rowDetail['desc' . $lang]) !!}
@@ -154,25 +175,7 @@
                             @endif
                         @endforeach
                     @endif
-                    @if (config('type.comment'))
-                        <div class="text-center flex">
-                            <div class="comment-star">
-                                <i class="far fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span style="width: {{ Comment::avgStar($rowDetail['id'], $rowDetail['type']) }}%">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </span>
-                            </div>
-                            <div class="comment-count"><a>({{ $countComment }} danh gia)</a></div>
-                        </div>
-                    @endif
+
 
                     <ul class="attr-pro-detail">
                         @if (!empty($brandDetail))
@@ -227,10 +230,6 @@
                         <a class="nav-link active" id="info-pro-detail-tab" data-bs-toggle="tab" href="#info-pro-detail"
                             role="tab">{{ __('web.thongtinsanpham') }}</a>
                     </li>
-                    {{-- <li class="nav-item">
-                        <a class="nav-link" id="album-pro-detail-tab" data-bs-toggle="tab" href="#album-pro-detail"
-                            role="tab">{{ __('web.hinhanh') }}</a> --}}
-                    </li>
                 </ul>
                 <div class="tab-content" id="tabsProDetailContent">
                     <div class="tab-pane fade show active" id="info-pro-detail" role="tabpanel">
@@ -246,34 +245,6 @@
                             </button>
                         </div>
                     </div>
-                    {{-- <div class="tab-pane fade" id="album-pro-detail" role="tabpanel">
-
-                        @if (!empty($rowDetailPhoto))
-                            <div class="grid-product">
-                                @foreach ($rowDetailPhoto as $v)
-                                    <div class="box-album" data-fancybox="gallery"
-                                        data-src="{{ assets_photo('product', '710x440x1', $v['photo'], '') }}">
-                                        <div class="scale-img">
-                                            @component('component.image', [
-    'class' => 'w-100',
-    'w' => config('type.product.' . $v['type'] . '.gallery.' . $v['type'] . '.photo_width'),
-    'h' => config('type.product.' . $v['type'] . '.gallery.' . $v['type'] . '.photo_height'),
-    'z' => config('type.product.' . $v['type'] . '.gallery.' . $v['type'] . '.photo_opt'),
-    'breakpoints' => [
-        412 => 390,
-    ],
-    'is_watermarks' => false,
-    'destination' => 'product',
-    'image' => $v['photo'] ?? '',
-    'alt' => $rowDetail['name' . $lang] ?? '',
-])
-                                            @endcomponent
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div> --}}
                 </div>
             </div>
             @if (config('type.comment'))

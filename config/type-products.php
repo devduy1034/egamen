@@ -74,7 +74,7 @@ return [
         //     ]
         // ],
         'view' => true,
-        // 'comment' => false,
+        'comment' => true,
         'properties' => true,
         'code' => true,
         'regular_price' => true,

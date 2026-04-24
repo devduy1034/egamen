@@ -232,13 +232,26 @@ class Comments {
 				} else {
 					// this.mediaSlid();
 					form.querySelector('textarea').value = '';
-					showNotify(
-						'Bình luận sẽ được hiển thị sau khi được Bản Quản Trị kiểm duyệt.',
-						'Thông báo',
-						'success'
-					);
+					if (result.result && result.result.auto_approved) {
+						showNotify(
+							result.result.message || 'Đánh giá của bạn đã được hiển thị.',
+							'Thông báo',
+							'success'
+						);
+					} else {
+						showNotify(
+							'Bình luận sẽ được hiển thị sau khi được Bản Quản Trị kiểm duyệt.',
+							'Thông báo',
+							'success'
+						);
+					}
 					holdonClose();
 					document.getElementById('form-comment').reset();
+					if (result.result && result.result.auto_approved) {
+						window.setTimeout(() => {
+							window.location.reload();
+						}, 600);
+					}
 				}
 			});
 	}

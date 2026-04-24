@@ -1,5 +1,6 @@
 @php
-    $seoDB = Seo::getOnDB($item['id'] ?? 0, $com, 'save', $item['type'] ?? '');
+    $seoType = $item['type'] ?? request()->route('type') ?? request()->query('type') ?? '';
+    $seoDB = Seo::getOnDB($item['id'] ?? 0, $com, 'save', $seoType);
     $slugurlArray = '';
     $seo_create = '';
     if (!empty(@$seoDB['meta'])) {
@@ -55,8 +56,7 @@
                                                 ký tự</strong>
                                         </div>
 
-                                        <input x-model="title['{{ $k }}'].value"
-                                            @keyup.debounce.50ms="seoRankMathGroup()" type="text"
+                                        <input @keyup.debounce.50ms="seoRankMathGroup()" type="text"
                                             class="form-control check-seo title-seo text-sm"
                                             name="dataSeo[title{{ $k }}]" id="title{{ $k }}"
                                             placeholder="SEO Title ({{ $k }})"
@@ -82,7 +82,7 @@
                                                 class="count-seo"><span>{{ !empty($seoDB) ? mb_strlen(@$seoDB['description' . $k] ?? '') : 0 }}</span>/160
                                                 ký tự</strong>
                                         </div>
-                                        <textarea x-model="description['{{ $k }}'].value" @keyup.debounce.50ms="seoRankMathGroup()"
+                                        <textarea @keyup.debounce.50ms="seoRankMathGroup()"
                                             class="form-control check-seo description-seo text-sm" name="dataSeo[description{{ $k }}]"
                                             id="description{{ $k }}" rows="5" placeholder="SEO Description ({{ $k }})">{!! !empty($seoDB) ? Func::decodeHtmlChars(@$seoDB['description' . $k] ?? '') : '' !!}</textarea>
                                     </div>

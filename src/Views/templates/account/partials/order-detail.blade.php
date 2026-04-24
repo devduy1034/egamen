@@ -1,6 +1,8 @@
 @php
     $selectedItems = is_array($selectedOrder->order_detail ?? null) ? array_values($selectedOrder->order_detail) : [];
     $extraItems = count($selectedItems) > 1 ? array_slice($selectedItems, 1) : [];
+    $deliveredOrderStatusId = (int) ($deliveredOrderStatusId ?? 0);
+    $isDeliveredOrder = $deliveredOrderStatusId > 0 && (int) ($selectedOrder->order_status ?? 0) === $deliveredOrderStatusId;
     $totalProductQty = collect($selectedItems)->reduce(function ($carry, $item) {
         return $carry + max(1, (int) ($item['qty'] ?? 1));
     }, 0);
@@ -40,6 +42,11 @@
             ->values()
             ->all();
         $lineProductId = (int) (data_get($line, 'options.itemProduct.id') ?? 0);
+        $lineProductType = trim((string) (data_get($line, 'options.itemProduct.type') ?? 'san-pham'));
+        if ($lineProductType === '') {
+            $lineProductType = 'san-pham';
+        }
+        $lineProductName = trim((string) ($line['name'] ?? 'Sản phẩm'));
         if ($lineProductId > 0 && !empty($linePropertyIds)) {
             $lineVariantCodeQuery = \LARAVEL\Models\ProductPropertiesModel::select('code')
                 ->where('id_parent', $lineProductId);
@@ -86,6 +93,14 @@
                 <p class="account-order-props">{{ implode(' | ', $linePropsAndCode) }}</p>
             @endif
             <p>SL: {{ $line['qty'] ?? 1 }} - Giá: {{ \Func::formatMoney((float) ($line['price'] ?? 0)) }}</p>
+            @if ($isDeliveredOrder && $lineProductId > 0)
+                <button type="button"
+                    class="btn account-btn account-btn--outline account-order-review-trigger js-order-review-trigger"
+                    data-product-id="{{ $lineProductId }}" data-product-type="{{ $lineProductType }}"
+                    data-product-name="{{ $lineProductName }}" data-product-photo="{{ $linePhotoUrl }}">
+                    Đánh giá sản phẩm
+                </button>
+            @endif
         </div>
     </div>
 @endforeach

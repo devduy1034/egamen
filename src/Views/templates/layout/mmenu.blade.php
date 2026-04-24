@@ -1,5 +1,9 @@
 @php
     $mobileProductMenu = $listProductMenu ?? $productListMenu ?? [];
+    $logoThumb = config('type.photo.logo.thumb') ?? '134x46x1';
+    $logoSrc = !empty($logoPhoto['photo'])
+        ? assets_photo('photo', $logoThumb, $logoPhoto['photo'], 'thumbs')
+        : assets('assets/admin/img/avatars/logo1bce.png');
 @endphp
 <div class="offcanvas offcanvas-start" id="menu-mobile">
     <div class="offcanvas-body">
@@ -7,7 +11,7 @@
         <nav class="menu-mobile">
             <div class="head-menu">
                 <a class="logo-header" href="{{ url('home') }}">
-                    <img src="{{ assets_photo('photo', '', $logoPhoto['photo']) }}" alt="{{ $setting['name' . $lang] }}">
+                    <img src="{{ $logoSrc }}" alt="{{ $setting['name' . $lang] }}" loading="eager" decoding="async">
                 </a>
                 <div class="search-menu">
                     <label for="keyword-mobile" class="mb-2">Bạn cần tìm sản phẩm gì</label>

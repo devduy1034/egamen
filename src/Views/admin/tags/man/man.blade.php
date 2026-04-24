@@ -35,6 +35,12 @@
                 </thead>
                 <tbody>
                     @forelse($items as $k => $v)
+                    @php
+                        $thumbSize = $configMan->thumb ?? '100x100x1';
+                        $imageSrc = !empty($v['photo'])
+                            ? assets_photo('news', $thumbSize, $v['photo'], 'thumbs')
+                            : assets('assets/images/noimage.png');
+                    @endphp
                     <tr>
                         <td class="align-middle">
                             <div class="custom-control custom-checkbox my-checkbox">
@@ -62,7 +68,8 @@
                         </td>
                         @if (!empty($configMan->show_images))
                         <td class="align-middle">
-                            <img class="img-preview" onerror=this.src='@asset("assets/images/noimage.png")' ; src="{{ upload('news', $v['photo']) }}" alt="{{ $v['namevi'] }}" title="{{ $v['namevi'] }}" />
+                            <img class="img-preview" src="{{ $imageSrc }}" loading="lazy" decoding="async"
+                                onerror="this.src='{{ assets('assets/images/noimage.png') }}';" alt="{{ $v['namevi'] }}" title="{{ $v['namevi'] }}" />
                         </td>
                         @endif
                         @foreach ($configMan->status??[] as $key => $value)

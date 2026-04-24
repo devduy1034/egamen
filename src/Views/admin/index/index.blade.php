@@ -1,10 +1,10 @@
 @extends('layout')
 @section('content')
-@php 
-$sessionAdmin = $_SESSION['admin'] ?? null;
-$adminId = is_array($sessionAdmin) ? ($sessionAdmin['admin'] ?? null) : $sessionAdmin;
-$adminUser = \LARAVEL\Models\UserModel::find($adminId); 
-@endphp
+    @php
+        $sessionAdmin = $_SESSION['admin'] ?? null;
+        $adminId = is_array($sessionAdmin) ? $sessionAdmin['admin'] ?? null : $sessionAdmin;
+        $adminUser = \LARAVEL\Models\UserModel::find($adminId);
+    @endphp
     <div class="container-xxl flex-grow-1 container-p-y container-fluid">
         <div class="row">
             <!-- Earning Reports -->
@@ -45,7 +45,8 @@ $adminUser = \LARAVEL\Models\UserModel::find($adminId);
                                     <a class="my-info-box info-box mb-lg-0"
                                         href="{{ url('admin', ['com' => 'user-admin', 'act' => 'man', 'type' => 'tai-khoan']) }}?changepass=1"
                                         title="Đổi mật khẩu">
-                                        <span class="my-info-box-icon info-box-icon bg-success"><i class="ti ti-key"></i></span>
+                                        <span class="my-info-box-icon info-box-icon bg-success"><i
+                                                class="ti ti-key"></i></span>
                                         <div class="info-box-content text-dark">
                                             <span class="info-box-text text-capitalize">Đổi mật khẩu</span>
                                             <span class="info-box-number">View more</span>
@@ -118,6 +119,121 @@ $adminUser = \LARAVEL\Models\UserModel::find($adminId);
                     </div>
                 </div>
             @endif
+            <div class="col-12 mb-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                    <div>
+                        <h5 class="mb-1">Thống kê nhanh đơn hàng</h5>
+                        <small class="text-muted">Cập nhật lúc
+                            {{ $quickOrderStats['updated_at'] ?? date('d/m/Y H:i') }}</small>
+                    </div>
+                    <a class="btn btn-sm btn-primary" href="{{ $orderDashboardUrl }}">Xem danh sách đơn hàng</a>
+                </div>
+                <div class="row g-4 order-quick-stats">
+                    <div class="col-xl-4 col-md-6">
+                        <div class="card h-100 order-quick-card">
+                            <div class="card-body">
+                                <div class="order-quick-card__head">
+                                    <span class="order-quick-card__icon bg-label-primary">
+                                        <i class="ti ti-shopping-cart"></i>
+                                    </span>
+                                    <div>
+                                        <h5 class="mb-1">Nhịp độ đơn hàng</h5>
+                                        <small class="text-muted">Khối lượng phát sinh trong tháng</small>
+                                    </div>
+                                </div>
+                                <div class="order-quick-card__value">
+                                    {{ number_format((int) ($quickOrderStats['month'] ?? 0)) }}</div>
+                                <div class="order-quick-card__caption">Tổng đơn tháng này</div>
+                                <div class="order-quick-list">
+                                    <div class="order-quick-list__item">
+                                        <span>Hôm nay</span>
+                                        <strong>{{ number_format((int) ($quickOrderStats['today'] ?? 0)) }}</strong>
+                                    </div>
+                                    <div class="order-quick-list__item">
+                                        <span>7 ngày gần đây</span>
+                                        <strong>{{ number_format((int) ($quickOrderStats['week'] ?? 0)) }}</strong>
+                                    </div>
+                                    <div class="order-quick-list__item">
+                                        <span>Doanh thu tháng</span>
+                                        <strong>{{ Func::formatMoney((float) ($quickOrderStats['month_revenue'] ?? 0)) }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-md-6">
+                        <div class="card h-100 order-quick-card">
+                            <div class="card-body">
+                                <div class="order-quick-card__head">
+                                    <span class="order-quick-card__icon bg-label-warning">
+                                        <i class="ti ti-clock-hour-4"></i>
+                                    </span>
+                                    <div>
+                                        <h5 class="mb-1">Đơn cần xử lý</h5>
+                                        <small class="text-muted">Các đơn đang chờ thao tác trong tháng</small>
+                                    </div>
+                                </div>
+                                <div class="order-quick-card__value text-warning">
+                                    {{ number_format((int) ($quickOrderStats['need_attention'] ?? 0)) }}
+                                </div>
+                                <div class="order-quick-card__caption">Tổng đơn cần theo dõi</div>
+                                <div class="order-quick-list">
+                                    <div class="order-quick-list__item">
+                                        <span>Chờ xác nhận</span>
+                                        <strong>{{ number_format((int) ($quickOrderStats['pending_confirm'] ?? 0)) }}</strong>
+                                    </div>
+                                    <div class="order-quick-list__item">
+                                        <span>Đang xử lý / đóng gói</span>
+                                        <strong>{{ number_format((int) ($quickOrderStats['processing_packing'] ?? 0)) }}</strong>
+                                    </div>
+                                    <div class="order-quick-list__item">
+                                        <span>Đang giao</span>
+                                        <strong>{{ number_format((int) ($quickOrderStats['shipping'] ?? 0)) }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-md-12">
+                        <div class="card h-100 order-quick-card">
+                            <div class="card-body">
+                                <div class="order-quick-card__head">
+                                    <span class="order-quick-card__icon bg-label-success">
+                                        <i class="ti ti-truck-delivery"></i>
+                                    </span>
+                                    <div>
+                                        <h5 class="mb-1">Kết quả giao hàng</h5>
+                                        <small class="text-muted">Hiệu suất hoàn tất đơn trong tháng</small>
+                                    </div>
+                                </div>
+                                <div class="order-quick-card__value text-success">
+                                    {{ number_format((int) ($quickOrderStats['delivered'] ?? 0)) }}
+                                </div>
+                                <div class="order-quick-card__caption">Đơn giao thành công</div>
+                                <div class="order-quick-list">
+                                    <div class="order-quick-list__item">
+                                        <span>Đơn đã hủy</span>
+                                        <strong>{{ number_format((int) ($quickOrderStats['canceled'] ?? 0)) }}</strong>
+                                    </div>
+                                    <div class="order-quick-list__item">
+                                        <span>Tỷ lệ giao thành công</span>
+                                        <strong>{{ number_format((float) ($quickOrderStats['delivery_rate'] ?? 0), 1) }}%</strong>
+                                    </div>
+                                    <div class="order-quick-list__item">
+                                        <span>Chênh lệch so với tháng trước</span>
+                                        <strong
+                                            class="{{ ((int) ($quickOrderStats['month_diff'] ?? 0)) >= 0 ? 'text-success' : 'text-danger' }}">
+                                            {{ ((int) ($quickOrderStats['month_diff'] ?? 0)) >= 0 ? '+' : '' }}{{ number_format((int) ($quickOrderStats['month_diff'] ?? 0)) }}
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="mb-4">
                 <div class="card h-100">
@@ -233,116 +349,76 @@ $adminUser = \LARAVEL\Models\UserModel::find($adminId);
                 </div>
             </div>
 
-            <!-- Browser States -->
-            <div class="col-xl-4 col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between">
-                        <div class="card-title m-0 me-2">
-                            <h5 class="m-0 me-2">Trình duyệt</h5>
-                            <small class="text-muted">Thống kê đến ngày {{ date('d/m/Y', time()) }}</small>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <ul class="p-0 m-0">
-                            @foreach ($browser ?? [] as $value)
 
-                                <li class="mb-3 pb-1 d-flex last:!mb-0">
-                                    <div class="d-flex w-50 align-items-center me-3">
-                                        <img onerror=this.src='@asset(' assets/admin/img/icons/brands/browser.png')' ;
-                                            src="../assets/admin/img/icons/brands/{{$value['browser']}}.png"
-                                            alt="{{$value['browser']}}" class="me-3" width="35" />
-                                        <div>
-                                            <h6 class="mb-0">
-                                                {{$value['browser']}}
-                                            </h6>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex flex-grow-1 align-items-center">
-                                        <div class="progress w-100 me-3" style="height: 8px">
-                                            <div class="progress-bar bg-danger" role="progressbar"
-                                                style="width: {{ Func::browser($value['browser'], $countBrowser, $value['count'])['numb'] }}%"
-                                                aria-valuenow="{{ Func::browser($value['browser'], $countBrowser, $value['count'])['numb'] }}"
-                                                aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                        <span
-                                            class="text-muted">{{ Func::browser($value['browser'], $countBrowser, $value['count'])['numb'] }}%</span>
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-xl-4 col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between">
-                        <div class="card-title m-0 me-2">
-                            <h5 class="m-0 me-2">Thiết bị truy cập</h5>
-                            <small class="text-muted">Thống kê đến ngày {{ date('d/m/Y', time()) }}</small>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <ul class="p-0 m-0">
-                            @foreach ($device ?? [] as $value)
-                                <li class="mb-3 pb-1 d-flex last:!mb-0">
-                                    <div class="d-flex w-50 align-items-center me-3">
-                                        <img src="../assets/admin/img/icons/brands/{{$value['device']}}.png"
-                                            alt="{{ $value['device'] }}" class="me-3" width="35" />
-                                        <div>
-                                            <h6 class="mb-0"> {{ $value['device'] }}
-                                            </h6>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex flex-grow-1 align-items-center">
-                                        <div class="progress w-100 me-3" style="height: 8px">
-                                            <div class="progress-bar bg-danger" role="progressbar"
-                                                style="width: {{ Func::device($value['device'], $countDevice, $value['count'])['numb'] }}%"
-                                                aria-valuenow="{{ Func::device($value['device'], $countDevice, $value['count'])['numb'] }}"
-                                                aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                        <span
-                                            class="text-muted">{{ Func::device($value['device'], $countDevice, $value['count'])['numb'] }}%</span>
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <!--/ Sales By Country -->
-
-            <div class="col-xl-4 col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between">
-                        <div class="card-title mb-0">
-                            <h5 class="mb-0">Top IP truy cập nhiều nhất</h5>
-                            <small class="text-muted">Thống kê đến ngày {{ date('d/m/Y', time()) }}</small>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <ul class="p-0 m-0">
-                            @foreach ($topIP ?? [] as $value)
-                                <li class="mb-3 last:!mb-0 pb-1 d-flex justify-content-between">
-                                    <div class="d-flex align-items-center me-3">
-                                        <div>
-                                            <h6 class="mb-0"> {{ $value['ip'] }}</h6>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="text-muted">{{ $value['visits'] }}</span>
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 @endsection
 @push('styles')
     <link rel="stylesheet" href="@asset('assets/admin/vendor/libs/apex-charts/apex-charts.css')" />
+    <style>
+        .order-quick-card {
+            border: 1px solid rgba(67, 89, 113, 0.12);
+            box-shadow: 0 10px 28px rgba(67, 89, 113, 0.08);
+        }
+
+        .order-quick-card__head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .order-quick-card__icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex: 0 0 48px;
+        }
+
+        .order-quick-card__value {
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 1.1;
+            color: #566a7f;
+        }
+
+        .order-quick-card__caption {
+            color: #8592a3;
+            font-size: 13px;
+            margin-top: 6px;
+            margin-bottom: 18px;
+        }
+
+        .order-quick-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .order-quick-list__item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        .order-quick-list__item span {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .order-quick-list__item strong {
+            color: #111827;
+            font-size: 15px;
+            font-weight: 700;
+        }
+    </style>
 @endpush
 @push('scripts')
     <script src="@asset('assets/admin/vendor/libs/apex-charts/apexcharts.js')"></script>

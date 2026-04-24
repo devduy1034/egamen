@@ -1,9 +1,16 @@
+@php
+    $galleryThumb = $thumb ?? '300x300x2';
+    $fallbackImage = assets('assets/images/noimage.png');
+    $galleryImage = !empty($value['photo']) ? assets_photo($folder, $galleryThumb, $value['photo'], 'thumbs') : $fallbackImage;
+@endphp
+
 <li class="jFiler-item my-jFiler-item my-jFiler-item-<?= $value['id'] ?> <?= $col ?>" data-id="<?= $value['id'] ?>">
     <div class="jFiler-item-container">
         <div class="jFiler-item-inner">
             <div class="jFiler-item-thumb">
                 <div class="jFiler-item-thumb-image">
-                    <img class="img-preview" src="{{ upload($folder, $value['photo']) }}" alt="{{ $value['namevi'] }}"
+                    <img class="img-preview" src="{{ $galleryImage }}" loading="lazy" decoding="async"
+                        onerror="this.src='{{ $fallbackImage }}';" alt="{{ $value['namevi'] }}"
                         title="{{ $value['namevi'] }}" />
                     <i class="fas fa-arrows-alt"></i>
                 </div>

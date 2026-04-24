@@ -12,8 +12,8 @@
                                     'w' => config('type.photo.' . $v['type'] . '.images.photo.width'),
                                     'h' => config('type.photo.' . $v['type'] . '.images.photo.height'),
                                     'z' => 0,
-                                    'loading' => 'lazy',
-                                    'fetchpriority' => 'low',
+                                    'loading' => 'eager',
+                                    'fetchpriority' => 'high',
                                     'decoding' => 'async',
                                     'type' => '',
                                     'destination' => 'photo',
@@ -92,7 +92,7 @@
                             <article class="voucher-home-card h-100">
                                 <div class="voucher-home-thumb">
                                     <img src="{{ $voucherImage }}" alt="{{ $voucher['code'] ?? '' }}"
-                                        loading="lazy" fetchpriority="low" decoding="async" width="70"
+                                        loading="eager" fetchpriority="high" decoding="async" width="70"
                                         height="115">
                                 </div>
                                 <div class="voucher-home-info">
@@ -173,11 +173,11 @@
                                         <a class="" href="{{ $v[$sluglang] }}" title="{{ $v['name' . $lang] }}">
                                             @component('component.image', [
                                                 'class' => 'w-100',
-                                                'w' => config('type.product.' . $v['type'] . '.categories.cat.images.photo.width'),
-                                                'h' => config('type.product.' . $v['type'] . '.categories.cat.images.photo.height'),
+                                                'w' => 300,
+                                                'h' => 300,
                                                 'z' => config('type.product.' . $v['type'] . '.categories.cat.images.photo.opt'),
-                                                'loading' => 'lazy',
-                                                'fetchpriority' => 'low',
+                                                'loading' => 'eager',
+                                                'fetchpriority' => 'high',
                                                 'decoding' => 'async',
                                                 'is_watermarks' => false,
                                                 'destination' => 'product',

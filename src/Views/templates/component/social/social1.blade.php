@@ -19,6 +19,7 @@
     $location = !empty($left) ? 'left' : 'right';
     $destop = !empty($val['destop']['device']) && device() == 'destop' ? true : false;
     $mobile = !empty($val['mobile']['device']) && device() == 'mobile' ? true : false;
+    $socialThumb = config('type.extensions.social.thumb') ?? '35x35x1';
 @endphp
 
 @if (!empty($destop) || !empty($mobile))
@@ -30,11 +31,16 @@
     --right: {{ $right }};
 ">
         @foreach ($mxh as $mxh)
+            @php
+                $socialSrc = !empty($mxh['photo'])
+                    ? assets_photo('photo', $socialThumb, $mxh['photo'], 'thumbs')
+                    : assets('assets/images/noimage.png');
+            @endphp
             <a class="btn-phone btn-frame text-decoration-none" href="{{ $mxh['link'] }}">
                 <div class="animated infinite zoomIn kenit-alo-circle"></div>
                 <div class="animated infinite pulse kenit-alo-circle-fill"></div>
-                <i><img onerror="this.src='assets/images/noimage.png';" src="{{ upload('photo', $mxh['photo']) }}"
-                        alt="{{ $mxh['namevi'] }}" title="{{ $mxh['namevi'] }}" width="35" /></i>
+                    <i><img onerror="this.src='assets/images/noimage.png';" src="{{ $socialSrc }}"
+                            alt="{{ $mxh['namevi'] }}" title="{{ $mxh['namevi'] }}" width="35" /></i>
             </a>
         @endforeach
     </div>

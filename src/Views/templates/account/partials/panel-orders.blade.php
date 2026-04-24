@@ -1,9 +1,11 @@
 @php
     $orderDetailApiUrl = url('user.account.orders.detail');
     $orderCancelApiUrl = url('user.account.orders.cancel');
+    $commentReviewApiUrl = rtrim((string) config('app.site_path'), '/') . '/comment/add-comment';
     $csrfToken = csrf_token();
     $orderKeywordValue = trim((string) ($orderKeyword ?? ''));
     $orderCurrentPage = is_object($orders ?? null) && method_exists($orders, 'currentPage') ? (int) $orders->currentPage() : 1;
+    $deliveredOrderStatusId = (int) ($deliveredOrderStatusId ?? 0);
 @endphp
 
 <section class="account-panel {{ $activeSection === 'orders' ? 'is-active' : '' }}">
@@ -70,6 +72,11 @@
                 ->values()
                 ->all();
             $firstProductId = (int) (data_get($firstItem, 'options.itemProduct.id') ?? 0);
+            $firstProductType = trim((string) (data_get($firstItem, 'options.itemProduct.type') ?? 'san-pham'));
+            if ($firstProductType === '') {
+                $firstProductType = 'san-pham';
+            }
+            $firstProductName = trim((string) ($firstItem['name'] ?? 'Sản phẩm'));
             if ($firstProductId > 0 && !empty($firstPropertyIds)) {
                 $variantCodeQuery = \LARAVEL\Models\ProductPropertiesModel::select('code')->where(
                     'id_parent',
@@ -112,6 +119,7 @@
                     : '-');
             $isSelectedOrder = !empty($selectedOrder) && (int) ($selectedOrder->id ?? 0) === (int) ($order->id ?? 0);
             $canCancelOrder = (int) ($order->order_status ?? 0) === 1;
+            $isDeliveredOrder = $deliveredOrderStatusId > 0 && (int) ($order->order_status ?? 0) === $deliveredOrderStatusId;
             $paymentMethodName = trim((string) ($order->getPayment->namevi ?? ''));
             $detailAnchor = '#order-card-' . (int) ($order->id ?? 0);
             $detailFallbackUrl =
@@ -156,6 +164,14 @@
                         @endif
                         <p>SL: {{ $firstItem['qty'] ?? 1 }} - Giá:
                             {{ \Func::formatMoney((float) ($firstItem['price'] ?? 0)) }}</p>
+                        @if ($isDeliveredOrder && $firstProductId > 0)
+                            <button type="button"
+                                class="btn account-btn account-btn--outline account-order-review-trigger js-order-review-trigger"
+                                data-product-id="{{ $firstProductId }}" data-product-type="{{ $firstProductType }}"
+                                data-product-name="{{ $firstProductName }}" data-product-photo="{{ $firstPhotoUrl }}">
+                                Đánh giá sản phẩm
+                            </button>
+                        @endif
                     </div>
                 </div>
             @endif
@@ -175,7 +191,10 @@
                 @if (!$isSelectedOrder) hidden @endif>
                 <div class="account-order-detail__content js-order-detail-content">
                     @if ($isSelectedOrder && !empty($selectedOrder) && (int) ($selectedOrder->id ?? 0) === (int) ($order->id ?? 0))
-                        @include('account.partials.order-detail', ['selectedOrder' => $selectedOrder])
+                        @include('account.partials.order-detail', [
+                            'selectedOrder' => $selectedOrder,
+                            'deliveredOrderStatusId' => $deliveredOrderStatusId,
+                        ])
                     @endif
                 </div>
                 <div class="account-order-detail__tools">
@@ -229,6 +248,65 @@
         </nav>
     @endif
 
+    <div class="account-review-modal js-order-review-modal" hidden>
+        <div class="account-review-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="review-order-title">
+            <button type="button" class="account-review-modal__close js-review-close" aria-label="Đóng">&times;</button>
+            <h3 id="review-order-title" class="account-review-modal__title">Đánh giá sản phẩm</h3>
+            <form class="account-review-form js-order-review-form" data-api-url="{{ $commentReviewApiUrl }}"
+                enctype="multipart/form-data">
+                <div class="account-review-product">
+                    <div class="account-review-product__thumb js-review-product-thumb" hidden>
+                        <img src="" alt="" class="js-review-product-image" loading="lazy">
+                    </div>
+                    <div>
+                        <p class="account-review-product__label">Sản phẩm đang đánh giá</p>
+                        <p class="account-review-product__name js-review-product-name">-</p>
+                    </div>
+                </div>
+
+                <div class="account-review-stars">
+                    <p class="account-review-field__label">Chọn số sao</p>
+                    <div class="account-review-stars__list">
+                        <button type="button" class="account-review-stars__star js-review-star" data-star-value="1"
+                            aria-label="1 sao">★</button>
+                        <button type="button" class="account-review-stars__star js-review-star" data-star-value="2"
+                            aria-label="2 sao">★</button>
+                        <button type="button" class="account-review-stars__star js-review-star" data-star-value="3"
+                            aria-label="3 sao">★</button>
+                        <button type="button" class="account-review-stars__star js-review-star" data-star-value="4"
+                            aria-label="4 sao">★</button>
+                        <button type="button" class="account-review-stars__star js-review-star" data-star-value="5"
+                            aria-label="5 sao">★</button>
+                    </div>
+                    <input type="hidden" name="dataReview[star]" class="js-review-star-input" value="">
+                </div>
+
+                <div class="account-review-field">
+                    <label class="account-review-field__label" for="account-review-content">Nội dung đánh giá</label>
+                    <textarea id="account-review-content" class="form-control js-review-content" name="dataReview[content]" rows="5"
+                        placeholder="Chia sẻ cảm nhận của bạn về sản phẩm này"></textarea>
+                </div>
+
+                <div class="account-review-field">
+                    <label class="account-review-field__label" for="account-review-photo">Hình ảnh (tối đa 3 hình)</label>
+                    <input id="account-review-photo" class="form-control js-review-photo-input" type="file"
+                        name="review-file-photo[]" accept="image/*" multiple>
+                </div>
+
+                <p class="account-review-form__error js-review-error" hidden></p>
+
+                <input type="hidden" name="dataReview[id_variant]" class="js-review-product-id" value="">
+                <input type="hidden" name="dataReview[type]" class="js-review-product-type" value="">
+                <input type="hidden" name="csrf_token" value="{{ $csrfToken }}">
+
+                <div class="account-review-form__actions">
+                    <button type="button" class="btn account-btn account-btn--outline js-review-close">Đóng</button>
+                    <button type="submit" class="btn account-btn js-review-submit">Gửi đánh giá</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="account-cancel-modal js-order-cancel-modal" hidden>
         <div class="account-cancel-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="cancel-order-title">
             <h3 id="cancel-order-title">Hủy đơn hàng</h3>
@@ -259,6 +337,17 @@
             var labelOpen = 'Ẩn bớt';
             var labelClose = 'Xem chi tiết';
             var cancelModal = panel.querySelector('.js-order-cancel-modal');
+            var reviewModal = panel.querySelector('.js-order-review-modal');
+            var reviewForm = reviewModal ? reviewModal.querySelector('.js-order-review-form') : null;
+            var reviewError = reviewModal ? reviewModal.querySelector('.js-review-error') : null;
+            var reviewProductName = reviewModal ? reviewModal.querySelector('.js-review-product-name') : null;
+            var reviewProductId = reviewModal ? reviewModal.querySelector('.js-review-product-id') : null;
+            var reviewProductType = reviewModal ? reviewModal.querySelector('.js-review-product-type') : null;
+            var reviewStarInput = reviewModal ? reviewModal.querySelector('.js-review-star-input') : null;
+            var reviewPhotoInput = reviewModal ? reviewModal.querySelector('.js-review-photo-input') : null;
+            var reviewProductThumb = reviewModal ? reviewModal.querySelector('.js-review-product-thumb') : null;
+            var reviewProductImage = reviewModal ? reviewModal.querySelector('.js-review-product-image') : null;
+            var reviewSubmitBtn = reviewModal ? reviewModal.querySelector('.js-review-submit') : null;
             var cancelReasonSelect = cancelModal ? cancelModal.querySelector('.js-cancel-reason-select') : null;
             var cancelReasonText = cancelModal ? cancelModal.querySelector('.js-cancel-reason-text') : null;
             var cancelError = cancelModal ? cancelModal.querySelector('.js-cancel-error') : null;
@@ -268,6 +357,16 @@
                 card: null,
                 button: null
             };
+
+            function notifyAccount(message, status) {
+                var text = String(message || '').trim();
+                if (!text) return;
+                if (typeof showNotify === 'function') {
+                    showNotify(text, 'Thông báo', status || 'success');
+                    return;
+                }
+                window.alert(text);
+            }
 
             function getButtons(card) {
                 if (!card) return [];
@@ -347,6 +446,195 @@
                 var text = String(message || '').trim();
                 cancelError.textContent = text;
                 cancelError.hidden = text === '';
+            }
+
+            function showReviewError(message) {
+                if (!reviewError) return;
+                var text = String(message || '').trim();
+                reviewError.textContent = text;
+                reviewError.hidden = text === '';
+            }
+
+            function setReviewStars(value) {
+                var starValue = Number(value || 0);
+                if (reviewStarInput) {
+                    reviewStarInput.value = starValue > 0 ? String(starValue) : '';
+                }
+                if (!reviewModal) return;
+                reviewModal.querySelectorAll('.js-review-star').forEach(function(button) {
+                    var currentValue = Number(button.dataset.starValue || 0);
+                    button.classList.toggle('is-active', currentValue > 0 && currentValue <= starValue);
+                });
+            }
+
+            function resetReviewForm() {
+                if (reviewForm) {
+                    reviewForm.reset();
+                }
+                if (reviewProductName) {
+                    reviewProductName.textContent = '-';
+                }
+                if (reviewProductId) {
+                    reviewProductId.value = '';
+                }
+                if (reviewProductType) {
+                    reviewProductType.value = '';
+                }
+                if (reviewProductImage) {
+                    reviewProductImage.setAttribute('src', '');
+                    reviewProductImage.setAttribute('alt', '');
+                }
+                if (reviewProductThumb) {
+                    reviewProductThumb.hidden = true;
+                }
+                setReviewStars(0);
+                showReviewError('');
+            }
+
+            function closeReviewModal() {
+                if (!reviewModal) return;
+                reviewModal.hidden = true;
+                document.documentElement.classList.remove('account-review-modal-open');
+                document.body.classList.remove('account-review-modal-open');
+                resetReviewForm();
+            }
+
+            function openReviewModal(button) {
+                if (!reviewModal || !button) return;
+                resetReviewForm();
+
+                var productId = String(button.dataset.productId || '').trim();
+                var productType = String(button.dataset.productType || 'san-pham').trim() || 'san-pham';
+                var productName = String(button.dataset.productName || 'Sản phẩm').trim() || 'Sản phẩm';
+                var productPhoto = String(button.dataset.productPhoto || '').trim();
+
+                if (reviewProductId) {
+                    reviewProductId.value = productId;
+                }
+                if (reviewProductType) {
+                    reviewProductType.value = productType;
+                }
+                if (reviewProductName) {
+                    reviewProductName.textContent = productName;
+                }
+                if (reviewProductImage) {
+                    reviewProductImage.setAttribute('alt', productName);
+                }
+                if (reviewProductThumb) {
+                    reviewProductThumb.hidden = productPhoto === '';
+                }
+                if (reviewProductImage && productPhoto !== '') {
+                    reviewProductImage.setAttribute('src', productPhoto);
+                }
+
+                reviewModal.hidden = false;
+                document.documentElement.classList.add('account-review-modal-open');
+                document.body.classList.add('account-review-modal-open');
+
+                var contentField = reviewForm ? reviewForm.querySelector('.js-review-content') : null;
+                if (contentField) {
+                    contentField.focus();
+                }
+            }
+
+            function submitReviewForm(event) {
+                event.preventDefault();
+                if (!reviewForm) return;
+
+                var apiUrl = String(reviewForm.dataset.apiUrl || '').trim();
+                var productId = reviewProductId ? String(reviewProductId.value || '').trim() : '';
+                var productType = reviewProductType ? String(reviewProductType.value || '').trim() : '';
+                var starValue = reviewStarInput ? String(reviewStarInput.value || '').trim() : '';
+                var contentField = reviewForm.querySelector('.js-review-content');
+                var contentValue = contentField ? String(contentField.value || '').trim() : '';
+                var totalFiles = reviewPhotoInput && reviewPhotoInput.files ? reviewPhotoInput.files.length : 0;
+
+                if (!productId || !productType || !apiUrl) {
+                    showReviewError('Không thể xác định sản phẩm cần đánh giá.');
+                    return;
+                }
+                if (!starValue) {
+                    showReviewError('Vui lòng chọn số sao đánh giá.');
+                    return;
+                }
+                if (!contentValue) {
+                    showReviewError('Vui lòng nhập nội dung đánh giá.');
+                    return;
+                }
+                if (totalFiles > 3) {
+                    showReviewError('Bạn chỉ có thể tải lên tối đa 3 hình ảnh.');
+                    return;
+                }
+
+                if (reviewSubmitBtn) {
+                    reviewSubmitBtn.disabled = true;
+                }
+                showReviewError('');
+
+                var formData = new FormData(reviewForm);
+
+                if (typeof holdonOpen === 'function') {
+                    holdonOpen();
+                }
+
+                fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    })
+                    .then(function(response) {
+                        return response.json().then(function(payload) {
+                            return {
+                                ok: response.ok,
+                                payload: payload
+                            };
+                        }).catch(function() {
+                            return {
+                                ok: response.ok,
+                                payload: null
+                            };
+                        });
+                    })
+                    .then(function(result) {
+                        if (!result.payload) {
+                            throw new Error('Không thể gửi đánh giá. Vui lòng thử lại.');
+                        }
+                        if (!result.ok) {
+                            throw new Error(result.payload.message || 'Không thể gửi đánh giá. Vui lòng thử lại.');
+                        }
+
+                        if (result.payload.errors) {
+                            throw new Error(Array.isArray(result.payload.errors) ? result.payload.errors.join('\n') : String(result.payload.errors));
+                        }
+
+                        var autoApproved = !!(result.payload.result && result.payload.result.auto_approved);
+                        var successMessage = autoApproved ?
+                            (result.payload.result.message || 'Đánh giá của bạn đã được hiển thị.') :
+                            'Đánh giá của bạn đã được gửi và đang chờ duyệt.';
+
+                        closeReviewModal();
+                        notifyAccount(successMessage, 'success');
+
+                        if (autoApproved) {
+                            window.setTimeout(function() {
+                                window.location.reload();
+                            }, 600);
+                        }
+                    })
+                    .catch(function(error) {
+                        showReviewError(error && error.message ? error.message : 'Không thể gửi đánh giá.');
+                    })
+                    .then(function() {
+                        if (reviewSubmitBtn) {
+                            reviewSubmitBtn.disabled = false;
+                        }
+                        if (typeof holdonClose === 'function') {
+                            holdonClose();
+                        }
+                    });
             }
 
             function toggleCancelReasonText() {
@@ -510,6 +798,27 @@
             }
 
             panel.addEventListener('click', function(event) {
+                var reviewTrigger = event.target.closest('.js-order-review-trigger');
+                if (reviewTrigger) {
+                    event.preventDefault();
+                    openReviewModal(reviewTrigger);
+                    return;
+                }
+
+                var reviewStar = event.target.closest('.js-review-star');
+                if (reviewStar && reviewModal && !reviewModal.hidden) {
+                    event.preventDefault();
+                    setReviewStars(reviewStar.dataset.starValue || 0);
+                    return;
+                }
+
+                var reviewClose = event.target.closest('.js-review-close');
+                if (reviewClose) {
+                    event.preventDefault();
+                    closeReviewModal();
+                    return;
+                }
+
                 var cancelButton = event.target.closest('.js-order-cancel');
                 if (cancelButton) {
                     event.preventDefault();
@@ -550,6 +859,9 @@
             if (cancelReasonSelect) {
                 cancelReasonSelect.addEventListener('change', toggleCancelReasonText);
             }
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', submitReviewForm);
+            }
             if (cancelCloseBtn) {
                 cancelCloseBtn.addEventListener('click', closeCancelModal);
             }
@@ -563,6 +875,23 @@
                     }
                 });
             }
+            if (reviewModal) {
+                reviewModal.addEventListener('click', function(event) {
+                    if (event.target === reviewModal) {
+                        closeReviewModal();
+                    }
+                });
+            }
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    if (reviewModal && !reviewModal.hidden) {
+                        closeReviewModal();
+                    }
+                    if (cancelModal && !cancelModal.hidden) {
+                        closeCancelModal();
+                    }
+                }
+            });
 
             var hash = window.location.hash || '';
             if (!hash || hash.indexOf('#order-card-') !== 0) return;

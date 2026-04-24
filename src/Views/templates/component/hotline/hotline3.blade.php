@@ -18,7 +18,6 @@
     $color = $opt['color'] ?? '';
     $location = !empty($left) ? 'left' : 'right';
     $hotline = explode('-', $val['hotlinevi']);
-    $photo = upload('photo', $val['photo']);
     $destop = !empty($opt['destop']['device']) && device() == 'destop' ? true : false;
     $mobile = !empty($opt['mobile']['device']) && device() == 'mobile' ? true : false;
 @endphp

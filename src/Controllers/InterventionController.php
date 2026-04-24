@@ -26,6 +26,10 @@ class InterventionController extends Controller
         $this->ensureDirectoryExists($thumb_path);
         $generatedBinary = null;
 
+        if (File::exists($thumbFile)) {
+            $this->respondWebp($thumbFile);
+        }
+
         $lockHandle = $this->acquireImageLock($thumbFile);
 
         try {
@@ -49,6 +53,10 @@ class InterventionController extends Controller
         $thumbFile = $thumb_path . '/' . $imageUrl . '.webp';
         $this->ensureDirectoryExists($thumb_path);
         $generatedBinary = null;
+
+        if (File::exists($thumbFile)) {
+            $this->respondWebp($thumbFile);
+        }
 
         $lockHandle = $this->acquireImageLock($thumbFile);
 

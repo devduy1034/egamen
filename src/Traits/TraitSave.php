@@ -79,7 +79,7 @@ trait TraitSave
     {
         if (!empty($files) && class_exists($model)) {
             for ($i = 0; $i < count($files); $i++) {
-                if (!empty($files[$i]) && !empty($request->input('numb-filer')[$i])) {
+                if (!empty($files[$i])) {
                     $photoUpdate = array();
                     $filename =  Func::nameImg($files[$i]->getClientOriginalName());
                     if ($files[$i]->storeAs($path, $filename)) {
@@ -93,9 +93,7 @@ trait TraitSave
                             $photoUpdate['id_parent'] = $id;
                         }
                         $photoUpdate['status'] = 'hienthi';
-                        if (!empty($request->input('numb-filer')[$i])) {
-                            $photoUpdate['numb'] = $request->input('numb-filer')[$i];
-                        }
+                        $photoUpdate['numb'] = !empty($request->input('numb-filer')[$i]) ? $request->input('numb-filer')[$i] : ($i + 1);
                         if (!empty($request->input('name-filer-vi')[$i])) {
                             $photoUpdate['namevi'] = $request->input('name-filer-vi')[$i];
                         }
