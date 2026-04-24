@@ -464,6 +464,7 @@ class AuthController extends Controller
             'wishlistItems' => $wishlistItems,
             'birthdayValue' => !empty($user->birthday) ? date('Y-m-d', (int) $user->birthday) : '',
             'noImageUrl' => rtrim((string) config('app.asset'), '/') . '/assets/images/noimage.png',
+            'deliveredOrderStatusId' => $this->resolveDeliveredOrderStatusId(),
         ]);
     }
 
@@ -504,6 +505,7 @@ class AuthController extends Controller
         $html = View::render('account.partials.order-detail', [
             'selectedOrder' => $order,
             'orderTimeline' => $orderTimeline,
+            'deliveredOrderStatusId' => $this->resolveDeliveredOrderStatusId(),
         ]);
 
         return response()->json([

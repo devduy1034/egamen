@@ -1,3 +1,7 @@
+@php
+    $album = Comment::photo($params['id'], $params['type']);
+@endphp
+
 <div class="comment-item">
     <div class="comment-item-poster">
         <div class="comment-item-letter">{{ Comment::subName($params['fullname']) }}</div>
@@ -30,8 +34,8 @@
         <a class="btn-reply-comment d-inline-block align-top text-decoration-none text-primary mb-2"
             href="javascript:void(0)" data-name="{{ $params['fullname'] }}">Trả lời</a>
 
-        @if (!empty($params['photo']) || !empty($params['video']))
-            @component('component.comment.media', ['params' => $params])
+        @if (!empty($params['photo']) || !empty($params['video']) || !empty($album))
+            @component('component.comment.media', ['params' => $params, 'album' => $album])
             @endcomponent
         @endif
         @php

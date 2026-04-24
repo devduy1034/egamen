@@ -6,6 +6,10 @@
         $colorContent = $opt['color-content'] ?? '';
         $colorSend = $opt['color-send'] ?? '';
         $backgroundSend = $opt['background-send'] ?? '';
+        $popupThumb = config('type.extensions.popup.thumb') ?? '800x500x1';
+        $popupSrc = !empty($val['photo'])
+            ? assets_photo('photo', $popupThumb, $val['photo'], 'thumbs')
+            : assets('assets/images/noimage.png');
     @endphp
 
     <div class="modal fade show popup1" id="popup" tabindex="-1" aria-labelledby="popupLabel" aria-hidden="true">
@@ -17,9 +21,7 @@
 
                 <div class="modal-body">
                     <a href="{{ $val['link'] }}">
-                        <img data-src="{{ upload('photo', $val['photo']) }}" alt="{{ $val['namevi'] }}"
-                            class="lazy loaded w-100" src="{{ upload('photo', $val['photo']) }}"
-                            data-was-processed="true">
+                        <img alt="{{ $val['namevi'] }}" class="w-100" src="{{ $popupSrc }}" decoding="async">
                     </a>
                     <div class="form-popup"
                         style="--background: #{{ $background }};--color: #{{ $colorTitle }};--color1: #{{ $colorContent }};">

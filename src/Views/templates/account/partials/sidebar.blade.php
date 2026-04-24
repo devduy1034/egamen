@@ -20,5 +20,5 @@
         <a class="account-nav-btn {{ $activeSection === 'wishlist' ? 'is-active' : '' }}" href="{{ url('user.account', null, ['section' => 'wishlist']) }}">Yêu thích</a>
         <a class="account-nav-btn {{ $activeSection === 'security' ? 'is-active' : '' }}" href="{{ url('user.account', null, ['section' => 'security']) }}">Bảo mật</a>
     </nav>
-    <a href="{{ url('user.logout') }}" class="btn account-btn account-btn--outline w-100 mt-3">Đăng xuất</a>
+    <a href="{{ url('user.logout') }}" class="btn account-btn account-btn--outline account-btn--logout w-100 mt-3">Đăng xuất</a>
 </aside>

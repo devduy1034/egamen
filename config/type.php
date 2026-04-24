@@ -62,12 +62,12 @@ return [
             'link_googlemaps'  => true,
             'ship_area' => true,
         ],
-        'dieu-huong' => [
-            'title_main' => "Điều hướng link",
-            'old_link' => true,
-            'new_link' => true,
-            '302' => true
-        ]
+        // 'dieu-huong' => [
+        //     'title_main' => "Điều hướng link",
+        //     'old_link' => true,
+        //     'new_link' => true,
+        //     '302' => true
+        // ]
     ],
 
     'extensions' => [
@@ -255,5 +255,12 @@ return [
     'type_file' => 'doc,docx,pdf,rar,zip,ppt,pptx,xls,xlsx',
     'type_video' => 'mp3,mp4',
     'table' => ['product', 'news', 'static'],
-    'link_content' => ['content', 'promotion']
+    'link_content' => ['content', 'promotion'],
+    'comment' => [
+        'binh-luan' => [
+            'title_main' => "Bình luận",
+            'search' => true,
+            'status' => ["hienthi" => "Hiển thị"],
+        ],
+    ],
 ];

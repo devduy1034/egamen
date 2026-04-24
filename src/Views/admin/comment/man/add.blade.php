@@ -60,7 +60,7 @@
                 <div class="col-12 col-lg-4">
                     <div class="card mb-4 form-group-category">
                         <div class="card-header">
-                            <h5 class="card-title mb-0">S? sao</h5>
+                            <h5 class="card-title mb-0">Số sao</h5>
                         </div>
                         <div class="card-body">
                             <div class="form-group last:!mb-0">

@@ -1,5 +1,6 @@
 @php
-    $seoDB = Seo::getOnDB($item['id']??0, $com, 'save', $item['type']??'');
+    $seoType = $item['type'] ?? request()->route('type') ?? request()->query('type') ?? '';
+    $seoDB = Seo::getOnDB($item['id']??0, $com, 'save', $seoType);
     $seo_create = '';
 @endphp
 <div class="col-12 col-lg-12">

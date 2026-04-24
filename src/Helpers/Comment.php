@@ -8,11 +8,18 @@ use LARAVEL\Core\Singleton;
 use LARAVEL\Models\CommentModel;
 use LARAVEL\Models\PhotoModel;
 use LARAVEL\Models\GalleryModel;
+use LARAVEL\Models\MemberModel;
+use LARAVEL\Models\OrderStatusModel;
+use LARAVEL\Models\OrdersModel;
 use Func;
 
 class Comment
 {
     use Singleton;
+
+    protected array $verifiedPurchaseMemberCache = [];
+    protected array $verifiedPurchaseOrderCache = [];
+    protected ?int $deliveredOrderStatusIdCache = null;
 
     public function countStar($id = 0, $type = '')
     {
@@ -43,7 +50,7 @@ class Comment
             ->where('id_parent', 0)
             ->where('id_variant', $id_variant)
             ->where('type',  $type);
-        if (!empty($is_admin)) $query->whereRaw("FIND_IN_SET(?,status)", ['hienthi']);
+        if (empty($is_admin)) $query->whereRaw("FIND_IN_SET(?,status)", ['hienthi']);
         $row = $query->orderBy('id', 'desc')
             ->first();
 
@@ -116,7 +123,7 @@ class Comment
             ->where('id_variant', $id)
             ->where('type', $type);
 
-        if (!empty($is_admin)) {
+        if (empty($is_admin)) {
             $query->whereRaw("FIND_IN_SET(?,status)", ['hienthi']);
         }
 
@@ -136,6 +143,55 @@ class Comment
     public function scoreStar($star = 0)
     {
         return (!empty($star)) ? ($star * 100) / 5 : 0;
+    }
+
+    public function isVerifiedPurchaseComment($comment = null): bool
+    {
+        $statusList = array_filter(array_map('trim', explode(',', (string) data_get($comment, 'status', ''))));
+        if (in_array('damuahang', $statusList, true)) {
+            return true;
+        }
+
+        $productId = (int) data_get($comment, 'id_variant', 0);
+        if ($productId <= 0) {
+            return false;
+        }
+
+        $memberId = $this->resolveMemberIdForComment($comment);
+        if ($memberId <= 0) {
+            return false;
+        }
+
+        $cacheKey = $memberId . ':' . $productId;
+        if (array_key_exists($cacheKey, $this->verifiedPurchaseOrderCache)) {
+            return $this->verifiedPurchaseOrderCache[$cacheKey];
+        }
+
+        $deliveredStatusId = $this->resolveDeliveredOrderStatusId();
+        if ($deliveredStatusId <= 0) {
+            $this->verifiedPurchaseOrderCache[$cacheKey] = false;
+            return false;
+        }
+
+        $orders = OrdersModel::select('order_detail')
+            ->where('id_user', $memberId)
+            ->where('order_status', $deliveredStatusId)
+            ->orderBy('id', 'desc')
+            ->get();
+
+        foreach ($orders as $order) {
+            $orderItems = is_array($order->order_detail ?? null) ? array_values($order->order_detail) : [];
+            foreach ($orderItems as $item) {
+                $orderedProductId = (int) data_get($item, 'options.itemProduct.id', data_get($item, 'id', 0));
+                if ($orderedProductId === $productId) {
+                    $this->verifiedPurchaseOrderCache[$cacheKey] = true;
+                    return true;
+                }
+            }
+        }
+
+        $this->verifiedPurchaseOrderCache[$cacheKey] = false;
+        return false;
     }
 
 
@@ -194,5 +250,93 @@ class Comment
         }
 
         return $result;
+    }
+
+    private function resolveMemberIdForComment($comment = null): int
+    {
+        $email = trim((string) data_get($comment, 'email', ''));
+        if ($email !== '') {
+            $cacheKey = 'email:' . strtolower($email);
+            if (array_key_exists($cacheKey, $this->verifiedPurchaseMemberCache)) {
+                return $this->verifiedPurchaseMemberCache[$cacheKey];
+            }
+
+            $memberId = (int) (MemberModel::where('email', $email)->value('id') ?? 0);
+            $this->verifiedPurchaseMemberCache[$cacheKey] = $memberId;
+            if ($memberId > 0) {
+                return $memberId;
+            }
+        }
+
+        $phone = trim((string) data_get($comment, 'phone', ''));
+        if ($phone !== '') {
+            $cacheKey = 'phone:' . $phone;
+            if (array_key_exists($cacheKey, $this->verifiedPurchaseMemberCache)) {
+                return $this->verifiedPurchaseMemberCache[$cacheKey];
+            }
+
+            $memberId = (int) (MemberModel::where('phone', $phone)->value('id') ?? 0);
+            $this->verifiedPurchaseMemberCache[$cacheKey] = $memberId;
+            return $memberId;
+        }
+
+        return 0;
+    }
+
+    private function resolveDeliveredOrderStatusId(): int
+    {
+        if ($this->deliveredOrderStatusIdCache !== null) {
+            return $this->deliveredOrderStatusIdCache;
+        }
+
+        $statuses = OrderStatusModel::select('id', 'namevi')->get();
+        if (empty($statuses)) {
+            $this->deliveredOrderStatusIdCache = 0;
+            return 0;
+        }
+
+        $keywordGroups = [
+            ['da giao', 'giao hang thanh cong', 'giao thanh cong', 'hoan tat', 'hoan thanh'],
+            ['delivered', 'completed'],
+        ];
+
+        foreach ($keywordGroups as $keywords) {
+            foreach ($statuses as $status) {
+                $name = $this->normalizeText((string) ($status->namevi ?? ''));
+                foreach ($keywords as $keyword) {
+                    if ($keyword !== '' && strpos($name, $keyword) !== false) {
+                        $this->deliveredOrderStatusIdCache = (int) ($status->id ?? 0);
+                        return $this->deliveredOrderStatusIdCache;
+                    }
+                }
+            }
+        }
+
+        $this->deliveredOrderStatusIdCache = 0;
+        return 0;
+    }
+
+    private function normalizeText(string $value = ''): string
+    {
+        $value = mb_strtolower(trim($value), 'UTF-8');
+        if ($value === '') {
+            return '';
+        }
+
+        $replacements = [
+            'à' => 'a', 'á' => 'a', 'ạ' => 'a', 'ả' => 'a', 'ã' => 'a', 'â' => 'a', 'ầ' => 'a', 'ấ' => 'a', 'ậ' => 'a', 'ẩ' => 'a', 'ẫ' => 'a', 'ă' => 'a', 'ằ' => 'a', 'ắ' => 'a', 'ặ' => 'a', 'ẳ' => 'a', 'ẵ' => 'a',
+            'è' => 'e', 'é' => 'e', 'ẹ' => 'e', 'ẻ' => 'e', 'ẽ' => 'e', 'ê' => 'e', 'ề' => 'e', 'ế' => 'e', 'ệ' => 'e', 'ể' => 'e', 'ễ' => 'e',
+            'ì' => 'i', 'í' => 'i', 'ị' => 'i', 'ỉ' => 'i', 'ĩ' => 'i',
+            'ò' => 'o', 'ó' => 'o', 'ọ' => 'o', 'ỏ' => 'o', 'õ' => 'o', 'ô' => 'o', 'ồ' => 'o', 'ố' => 'o', 'ộ' => 'o', 'ổ' => 'o', 'ỗ' => 'o', 'ơ' => 'o', 'ờ' => 'o', 'ớ' => 'o', 'ợ' => 'o', 'ở' => 'o', 'ỡ' => 'o',
+            'ù' => 'u', 'ú' => 'u', 'ụ' => 'u', 'ủ' => 'u', 'ũ' => 'u', 'ư' => 'u', 'ừ' => 'u', 'ứ' => 'u', 'ự' => 'u', 'ử' => 'u', 'ữ' => 'u',
+            'ỳ' => 'y', 'ý' => 'y', 'ỵ' => 'y', 'ỷ' => 'y', 'ỹ' => 'y',
+            'đ' => 'd',
+        ];
+
+        $value = strtr($value, $replacements);
+        $value = preg_replace('/[^a-z0-9]+/', ' ', (string) $value);
+        $value = preg_replace('/\s+/', ' ', (string) $value);
+
+        return trim((string) $value);
     }
 }

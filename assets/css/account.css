@@ -469,6 +469,177 @@
     color: #1f2937;
 }
 
+.account-review-modal-open {
+    overflow: hidden;
+}
+
+.account-order-review-trigger {
+    margin-top: 10px;
+}
+
+.account-review-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.account-review-modal[hidden] {
+    display: none;
+}
+
+.account-review-modal__dialog {
+    position: relative;
+    width: min(620px, 100%);
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+    border-radius: 18px;
+    border: 1px solid #dbe7f4;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+    padding: 20px;
+}
+
+.account-review-modal__close {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #64748b;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.account-review-modal__close:hover {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.account-review-modal__title {
+    margin: 0 36px 18px 0;
+    color: #1f2e46;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.account-review-form {
+    display: grid;
+    gap: 16px;
+}
+
+.account-review-product {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid #dbe7f4;
+    background: #f8fbff;
+}
+
+.account-review-product__thumb {
+    width: 72px;
+    height: 72px;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid #d6e2ef;
+    background: #fff;
+}
+
+.account-review-product__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.account-review-product__label {
+    margin: 0 0 4px;
+    color: #64748b;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.account-review-product__name {
+    margin: 0;
+    color: #1e293b;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.account-review-field {
+    display: grid;
+    gap: 8px;
+}
+
+.account-review-field__label {
+    margin: 0;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.account-review-stars {
+    display: grid;
+    gap: 8px;
+}
+
+.account-review-stars__list {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.account-review-stars__star {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: #cbd5e1;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.16s ease, color 0.16s ease;
+}
+
+.account-review-stars__star:hover,
+.account-review-stars__star.is-active {
+    color: #f59e0b;
+}
+
+.account-review-stars__star:hover {
+    transform: translateY(-1px);
+}
+
+.account-review-form__error {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    color: #be123c;
+    font-size: 14px;
+}
+
+.account-review-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 4px;
+}
+
 @media (max-width: 576px) {
     .account-wishlist-card {
         grid-template-columns: 1fr;
@@ -496,5 +667,30 @@
 
     .wishlist-variant-modal__foot .account-btn {
         flex: 1 1 0;
+    }
+
+    .account-review-modal__dialog {
+        padding: 16px;
+    }
+
+    .account-review-modal__title {
+        font-size: 18px;
+    }
+
+    .account-review-product {
+        grid-template-columns: 60px minmax(0, 1fr);
+    }
+
+    .account-review-product__thumb {
+        width: 60px;
+        height: 60px;
+    }
+
+    .account-review-form__actions {
+        flex-direction: column-reverse;
+    }
+
+    .account-review-form__actions .account-btn {
+        width: 100%;
     }
 }

@@ -4,12 +4,10 @@
     <TITLE>:: Thông báo ::</TITLE>
     <base href="{{ config('app.admin') }}" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    {{-- Tắt auto refresh để click chuyển ngay --}}
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="robots" content="noodp,noindex,nofollow" />
     <link rel="stylesheet" href='@asset("assets/admin/vendor/fonts/fontawesome.css")' />
     <link rel="stylesheet" href='@asset("assets/admin/vendor/css/rtl/core.css")' class="template-customizer-core-css" />
-    <script src='@asset("assets/admin/vendor/js/bootstrap.js")'></script>
     <style type="text/css">
         body { background: #eee }
         #alert {
@@ -47,13 +45,18 @@
 </HEAD>
 
 <BODY>
+    @php
+        $transferUrl = !empty($page_transfer) ? $page_transfer : '';
+    @endphp
+    @if(!empty($transferUrl) && !empty($numb))
+        <script type="text/javascript">
+            window.location.replace(@json($transferUrl));
+        </script>
+    @endif
     <div id="alert">
         <i class="fas {{ $numb ? 'fa-solid fa-check fasuccess' : 'fa-solid fa-exclamation fadanger' }}"></i>
         <div class="title">Thông báo</div>
         <div class="message alert {{ $numb ? 'alert-success' : 'alert-danger' }}">{!! @$showtext !!}</div>
-        @php
-            $transferUrl = !empty($page_transfer) ? $page_transfer : '';
-        @endphp
         <div class="rlink">(
             <a href="{{ $transferUrl ?: 'javascript:void(0)' }}" id="transfer-link"
                 onclick="if('{{ $transferUrl }}'){window.location.href='{{ $transferUrl }}';}else if(window.history&&window.history.length>1){window.history.back();}return false;">
@@ -71,7 +74,6 @@
             pos += 1;
             elem.style.width = pos + '%';
         }, 40);
-        // inline onclick handles immediate navigation
     </script>
 </BODY>
 

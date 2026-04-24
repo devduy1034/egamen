@@ -29,7 +29,7 @@
                             <th>Email</th>
                             <th>Chuyên mục</th>
                             <th class="text-center">Ngày</th>
-                            <th class="text-center" width="150px">S? sao</th>
+                            <th class="text-center" width="150px">Số sao</th>
                             <th class="text-center">Trả lời</th>
                             @if (!empty($configMan->status))
                                 @foreach ($configMan->status as $key => $value)
@@ -76,7 +76,7 @@
                                     <td class="align-middle text-center">
                                         <a class="text-dark text-break">{{ $items[$i]['created_at'] }}</a>
                                     </td>
-                                  
+
                                     <td class="align-middle text-center">
                                         <a class="text-dark text-break">
                                             <div class="comment-item-rating mb-2 w-clear">
@@ -128,7 +128,7 @@
                                     <td class="align-middle text-center">
                                         @component('component.buttonList', [
                                             'params' => [
-                                                'id' => $items[$i]['id']
+                                                'id' => $items[$i]['id'],
                                             ],
                                         ])
                                         @endcomponent

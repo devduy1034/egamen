@@ -88,13 +88,18 @@
                                                         $productCode = trim((string) ($itemProduct['code'] ?? ''));
                                                     }
                                                 @endphp
+                                                @php
+                                                    $orderPhotoSrc = !empty($orderPhoto)
+                                                        ? assets_photo('product', '100x100x1', $orderPhoto, 'thumbs')
+                                                        : assets('assets/images/noimage.png');
+                                                @endphp
                                                 <tr>
                                                     <td class="align-middle text-center">{{ $num }}</td>
                                                     <td class="align-middle">
                                                         <a title="{{ $v['name'] }}">
                                                             <img class="img-preview"
-                                                                onerror="this.src='../assets/images/noimage.png';"
-                                                                src="{{ upload('product', $orderPhoto) }}"
+                                                                onerror="this.src='{{ assets('assets/images/noimage.png') }}';"
+                                                                src="{{ $orderPhotoSrc }}" loading="lazy" decoding="async"
                                                                 alt="{{ $v['name'] }}" title="{{ $v['name'] }}" />
                                                         </a>
                                                     </td>

@@ -2,18 +2,20 @@
     $rowComment = $rowDetail->getComment()->skip(0)->take(2)->get();
 
     $countComment = $rowDetail->getComment()->count();
+    $isLoggedInMember = session()->has('member');
+    $memberName = session()->get('member_name');
 @endphp
 
 <div class="comment-page">
     <!-- Statistic comment -->
     <div class="comment-statistic mb-4">
         <div class="card">
-            <div class="card-header text-uppercase"><strong>Danh gia san pham</strong></div>
-            <div class="card-body">
+            <div class="card-body" style="border: 0; padding: 0;">
+                <h4 class="mb-4" style="font-size: 18px; font-weight: bold;">Đánh giá {{ $rowDetail['name' . $lang] }}</h4>
                 <div class="row align-items-center py-3">
                     <div class="col-sm-6 col-lg-4 mb-4">
                         <div class="text-center">
-                            <div class="comment-title"><strong>Danh Gia Trung Binh</strong></div>
+                            <div class="comment-title"><strong>Đánh Giá Trung Bình</strong></div>
                             <div class="comment-point">
                                 <strong>{{ Comment::avgPoint($rowDetail['id'], $rowDetail['type']) }}/5</strong>
                             </div>
@@ -31,7 +33,7 @@
                                     <i class="fas fa-star"></i>
                                 </span>
                             </div>
-                            <div class="comment-count"><a>({{ $countComment }} danh gia)</a></div>
+                            <div class="comment-count"><a>{{ $countComment }} đánh giá</a></div>
                         </div>
                     </div>
                     <div class="col-sm-6 col-lg-4 mb-4">
@@ -91,11 +93,8 @@
                                 class="progress-total">{{ Comment::perScore($rowDetail['id'], $rowDetail['type'], 1) }}%</span>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-lg-4">
-                        <div class="text-center">
-                            <p class="mb-2">Chia se nhan xet ve san pham</p>
-                            <button type="button" class="btn btn-sm btn-warning btn-write-comment py-2 px-3">Danh gia ngay</button>
-                        </div>
+                    <div class="col-sm-12 mt-3 text-center">
+                        <button type="button" class="btn btn-primary btn-write-comment py-2 px-3">Viết đánh giá</button>
                     </div>
                 </div>
             </div>
@@ -105,7 +104,7 @@
     <!-- Write comment -->
     <div class="comment-write mb-4" id="comment-write">
         <div class="card">
-            <div class="card-header text-uppercase"><strong>Danh gia {{ $rowDetail['name' . $lang] }}</strong></div>
+            <div class="card-header text-uppercase"><strong>Đánh giá {{ $rowDetail['name' . $lang] }}</strong></div>
             <div class="card-body">
                 <form id="form-comment" action="" method="post" enctype="multipart/form-data">
                     <div class="response-review"></div>
@@ -113,22 +112,20 @@
                         <div class="col-12 col-lg-12">
 
                             <div class="form-group mb-2">
-                                <label for="review-content" class="mb-2">Viet nhan xet cua ban vao ben duoi:</label>
-                                    duoi:</label>
+                                <label for="review-content" class="mb-2">Viết nhận xét của bạn vào bên dưới:</label>
                                 <textarea class="form-control text-sm" name="dataReview[content]" id="review-content"
-                                    placeholder="Nhan xet cua ban ve san pham nay *" rows="11"></textarea>
+                                    placeholder="Nhận xét của bạn về sản phẩm này *" rows="11"></textarea>
                             </div>
 
                             <div class="form-group mb-2">
-                                <label class="mb-2"><strong>Hinh anh: (Toi da 3 hinh)</strong></label>
+                                <label class="mb-2"><strong>Hình ảnh: (Tối đa 3 hình)</strong></label>
                                 <div class="review-file-uploader">
                                     <input type="file" id="review-file-photo" name="review-file-photo">
                                 </div>
                             </div>
 
-
                             <div class="form-group mb-2">
-                                <label class="mb-2">Ban cam thay the nao ve san pham? (Chon sao):</label>
+                                <label class="mb-2">Bạn cảm thấy thế nào về sản phẩm? (Chọn sao):</label>
                                 <div class="review-rating-star mt-2 mb-4 text-center">
                                     <div class="review-rating-star-icon">
                                         <i class="fa fa-star star-empty" data-value="1"></i>
@@ -142,27 +139,35 @@
                                 </div>
                             </div>
 
-                            <div class="form-group mb-2">
-
-                                <div class="row row-10">
-                                    <div class="col-4 mg-col-10">
-                                        <input type="text" class="form-control text-sm"
-                                            name="dataReview[fullname]" id="review-fullname"
-                                            placeholder="Ho ten *" required>
-                                    </div>
-                                    <div class="col-4 mg-col-10">
-                                        <input type="text" class="form-control text-sm" name="dataReview[phone]"
-                                            id="review-phone" placeholder="So dien thoai *">
-                                    </div>
-                                    <div class="col-4 mg-col-10">
-                                        <input type="text" class="form-control text-sm" name="dataReview[email]"
-                                            id="review-email" placeholder="Email *" required>
+                            @if ($isLoggedInMember)
+                                <div class="form-group mb-2">
+                                    <div class="alert alert-light border text-sm mb-0">
+                                        Bạn đang đánh giá với tài khoản
+                                        <strong>{{ $memberName ?: 'đã đăng nhập' }}</strong>.
                                     </div>
                                 </div>
-                            </div>
+                            @else
+                                <div class="form-group mb-2">
+                                    <div class="row row-10">
+                                        <div class="col-4 mg-col-10">
+                                            <input type="text" class="form-control text-sm"
+                                                name="dataReview[fullname]" id="review-fullname"
+                                                placeholder="Họ tên *" required>
+                                        </div>
+                                        <div class="col-4 mg-col-10">
+                                            <input type="text" class="form-control text-sm" name="dataReview[phone]"
+                                                id="review-phone" placeholder="Số điện thoại *">
+                                        </div>
+                                        <div class="col-4 mg-col-10">
+                                            <input type="text" class="form-control text-sm" name="dataReview[email]"
+                                                id="review-email" placeholder="Email *" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-sm btn-comment btn-warning text-capitalize py-2 px-3">Gui danh gia</button>
+                    <button type="submit" class="btn btn-sm btn-comment btn-warning text-capitalize py-2 px-3">Gửi đánh giá</button>
                     <input type="hidden" name="dataReview[id_variant]" value="{{ $rowDetail['id'] }}">
                     <input type="hidden" name="dataReview[type]" value="{{ $rowDetail['type'] }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -172,11 +177,10 @@
     </div>
 
     <!-- Lists comment -->
-
     @if ($rowComment->isNotEmpty())
         <div class="comment-lists">
             <div class="card">
-                <div class="card-header text-uppercase"><strong>Cac binh luan khac</strong></div>
+                <div class="card-header text-uppercase"><strong>Các bình luận khác</strong></div>
                 <div class="card-body pt-5 pb-3">
                     <div class="comment-load">
                         @foreach ($rowComment as $v_lists)
@@ -197,7 +201,7 @@
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit"
                                     class="comment-more btn btn-sm btn-primary rounded-0 w-100 font-weight-bold py-2 px-3"
-                                    title="Tai them binh luan">Tai them binh luan</button>
+                                    title="Tải thêm bình luận">Tải thêm bình luận</button>
                             </form>
                         </div>
                     @endif
@@ -208,7 +212,6 @@
 </div>
 
 @push('styles')
-    <link href="assets/css/comment.css" rel="stylesheet">
     <link href="assets/fileuploader/font-fileuploader.css" rel="stylesheet">
     <link href="assets/fileuploader/jquery.fileuploader.min.css" rel="stylesheet">
     <link href="assets/fileuploader/jquery.fileuploader-theme-dragdrop.css" rel="stylesheet">

@@ -1,3 +1,12 @@
+@php
+    $previewThumb = $photoDetail['thumb'] ?? '300x300x2';
+    $fallbackImage = assets('assets/images/noimage.png');
+    $originalImage = !empty($photoDetail['image']) ? upload($photoDetail['upload'], $photoDetail['image']) : $fallbackImage;
+    $previewImage = !empty($photoDetail['image'])
+        ? assets_photo($photoDetail['upload'], $previewThumb, $photoDetail['image'], 'thumbs')
+        : $fallbackImage;
+@endphp
+
 <div class="photoUpload-zone">
     <div class="crop-view-popup d-block">
         <div class="setting-crop">
@@ -80,14 +89,14 @@
             <div class="photoUpload-detail" id="photoUpload-preview-{{ $key }}">
                 @if (!empty($photoDetail['image']))
                     <a class="img-container">
-                        <img class="rounded" onerror="this.src='../assets/images/noimage.png';"
-                            data-src="{{ upload($photoDetail['upload'], $photoDetail['image']) }}"
-                            src="{{ upload($photoDetail['upload'], $photoDetail['image']) }}" alt="Alt photo"
+                        <img class="rounded" onerror="this.src='{{ $fallbackImage }}';"
+                            data-src="{{ $originalImage }}"
+                            src="{{ $previewImage }}" loading="lazy" decoding="async" alt="Alt photo"
                             title="Alt photo" />
                     </a>
                 @else
-                    <img class="rounded" onerror="this.src='../assets/images/noimage.png';"
-                        src="{{ upload($photoDetail['upload'], $photoDetail['image']) }}" alt="Alt photo"
+                    <img class="rounded" onerror="this.src='{{ $fallbackImage }}';"
+                        src="{{ $fallbackImage }}" loading="lazy" decoding="async" alt="Alt photo"
                         title="Alt photo" />
                 @endif
                 <div class="flex flex-wrap items-center justify-content-center gap-10 mt-3">

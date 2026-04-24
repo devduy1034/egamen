@@ -18,7 +18,9 @@
     $color = $opt['color'] ?? '';
     $location = !empty($left) ? 'left' : 'right';
     $hotline = preg_replace('/[^0-9]/', '', $val['hotlinevi']);
-    $photo = upload('photo', $val['photo']);
+    $photo = !empty($val['photo'])
+        ? assets_photo('photo', config('type.extensions.hotline.thumb') ?? '35x35x1', $val['photo'], 'thumbs')
+        : assets('assets/images/noimage.png');
     $destop = !empty($opt['destop']['device']) && device() == 'destop' ? true : false;
     $mobile = !empty($opt['mobile']['device']) && device() == 'mobile' ? true : false;
 @endphp
